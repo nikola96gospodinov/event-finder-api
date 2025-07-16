@@ -12,7 +12,10 @@
   "python.analysis.autoSearchPaths": true,
   "python.analysis.diagnosticMode": "workspace",
   "python.linting.mypyArgs": ["--ignore-missing-imports", "--show-error-codes"],
-  "python.linting.flake8Args": ["--max-line-length=88"],
+  "python.linting.flake8Args": [
+    "--max-line-length=88",
+    "--config=pyproject.toml"
+  ],
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
