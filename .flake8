@@ -9,3 +9,5 @@ exclude =
     venv,
     .mypy_cache,
     .pytest_cache,
+per-file-ignores = 
+    services/search_words/get_search_words_for_event_sites.py:E501
