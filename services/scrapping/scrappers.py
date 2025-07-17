@@ -1,43 +1,23 @@
 import asyncio
 from typing import Optional
 
-from playwright.async_api import (
-    Browser,
-    BrowserContext,
-    Page,
-    Playwright,
-    async_playwright,
-)
+from playwright.async_api import Page
+
+from .browser_pool import get_browser_pool
 
 
 class BaseEventScraper:
     """Base class for event scrapers with common functionality."""
 
-    def __init__(self, base_url: str, headless: bool = True):
+    def __init__(self, base_url: str):
         self.base_url = base_url
-        self.headless = headless
-        self.playwright: Playwright
-        self.browser: Browser
-        self.context: BrowserContext
-        self.page: Page
 
-    async def setup(self):
-        """Initialize playwright browser."""
-        self.playwright = await async_playwright().start()
-        self.browser = await self.playwright.chromium.launch(headless=self.headless)
-        self.context = await self.browser.new_context()
-        self.page = await self.context.new_page()
-
-    async def close(self):
-        """Close browser and playwright."""
-        await self.browser.close()
-        await self.playwright.stop()
-
-    async def extract_event_urls(self, keyword: Optional[str] = None, **kwargs):
+    async def extract_event_urls(self, page, keyword: Optional[str] = None, **kwargs):
         """
         Extract URLs of events. To be implemented by subclasses.
 
         Args:
+            page: Playwright page instance
             keyword: Search term to find relevant events
             **kwargs: Additional keyword arguments
 
@@ -48,7 +28,7 @@ class BaseEventScraper:
 
     async def scrape_events_by_keyword(self, keyword: Optional[str] = None, **kwargs):
         """
-        Scrape event URLs for a single keyword.
+        Scrape event URLs for a single keyword using the browser pool.
 
         Args:
             keyword: Single keyword to search for
@@ -57,21 +37,20 @@ class BaseEventScraper:
         Returns:
             List of event URLs
         """
-        await self.setup()
+        browser_pool = await get_browser_pool()
 
-        try:
-            events = await self.extract_event_urls(keyword=keyword, **kwargs)
+        async with browser_pool.get_page() as page:
+            events = await self.extract_event_urls(page, keyword=keyword, **kwargs)
             return events
-        finally:
-            await self.close()
 
 
 class EventBriteScraper(BaseEventScraper):
-    def __init__(self, headless: bool = True):
-        super().__init__(base_url="https://www.eventbrite.com", headless=headless)
+    def __init__(self):
+        super().__init__(base_url="https://www.eventbrite.com")
 
     async def extract_event_urls(
         self,
+        page: Page,
         keyword="tech",
         country="United Kingdom",
         city="London",
@@ -84,6 +63,7 @@ class EventBriteScraper(BaseEventScraper):
         separately for promoted and non-promoted events.
 
         Args:
+            page: Playwright page instance
             keyword: Single search term to find relevant events
             country: Country to search in
             city: City to search in
@@ -100,9 +80,9 @@ class EventBriteScraper(BaseEventScraper):
         )
         print(f"Navigating to: {search_url}")
 
-        await self.page.goto(search_url)
+        await page.goto(search_url)
 
-        await self.page.wait_for_selector(
+        await page.wait_for_selector(
             'ul[class*="SearchResultPanelContentEventCardList-module__eventList"]',
             timeout=5000,
         )
@@ -110,12 +90,12 @@ class EventBriteScraper(BaseEventScraper):
         await asyncio.sleep(1)
 
         for _ in range(2):
-            await self.page.evaluate("window.scrollBy(0, 800)")
+            await page.evaluate("window.scrollBy(0, 800)")
             await asyncio.sleep(1)
 
         events = []
 
-        all_event_cards = await self.page.query_selector_all(
+        all_event_cards = await page.query_selector_all(
             'ul[class*="SearchResultPanelContentEventCardList-module__eventList"] li'
         )
 
@@ -171,11 +151,12 @@ class EventBriteScraper(BaseEventScraper):
 
 
 class MeetupScraper(BaseEventScraper):
-    def __init__(self, headless: bool = True):
-        super().__init__(base_url="https://www.meetup.com", headless=headless)
+    def __init__(self):
+        super().__init__(base_url="https://www.meetup.com")
 
     async def extract_event_urls(
         self,
+        page: Page,
         keyword="tech",
         location="London",
         country_code="gb",
@@ -186,6 +167,7 @@ class MeetupScraper(BaseEventScraper):
         Extract URLs of events from Meetup.
 
         Args:
+            page: Playwright page instance
             keyword: Single search term to find relevant events
             location: Location to search in (city, country)
             max_events: Maximum number of events to extract
@@ -204,19 +186,19 @@ class MeetupScraper(BaseEventScraper):
         )
 
         print(f"Navigating to: {search_url}")
-        await self.page.goto(search_url)
+        await page.goto(search_url)
 
         # Wait for the events to load
-        await self.page.wait_for_selector('a[href*="/events/"]', timeout=10000)
+        await page.wait_for_selector('a[href*="/events/"]', timeout=10000)
 
         # Scroll to load more events
         for _ in range(3):
-            await self.page.evaluate("window.scrollBy(0, 1000)")
+            await page.evaluate("window.scrollBy(0, 1000)")
             await asyncio.sleep(1)
 
         # Extract event links
         events = []
-        event_cards = await self.page.query_selector_all('a[href*="/events/"]')
+        event_cards = await page.query_selector_all('a[href*="/events/"]')
 
         for i, card in enumerate(event_cards):
             if i >= max_events:
@@ -238,14 +220,17 @@ class MeetupScraper(BaseEventScraper):
 
 
 class LumaScraper(BaseEventScraper):
-    def __init__(self, headless: bool = True):
-        super().__init__(base_url="https://lu.ma", headless=headless)
+    def __init__(self):
+        super().__init__(base_url="https://lu.ma")
 
-    async def extract_event_urls(self, keyword: Optional[str] = None, **kwargs):
+    async def extract_event_urls(
+        self, page: Page, keyword: Optional[str] = None, **kwargs
+    ):
         """
         Extract URLs of events from Luma.
 
         Args:
+            page: Playwright page instance
             keyword: Search term (ignored for Luma)
             **kwargs: Keyword arguments including:
                 location: Location to search in (city name)
@@ -260,18 +245,18 @@ class LumaScraper(BaseEventScraper):
         search_url = f"{self.base_url}/{location}".lower()
         print(f"Navigating to: {search_url}")
 
-        await self.page.goto(search_url)
+        await page.goto(search_url)
 
-        await self.page.wait_for_selector(
+        await page.wait_for_selector(
             'a[class*="event-link content-link"]', timeout=10000
         )
 
         for _ in range(3):
-            await self.page.evaluate("window.scrollBy(0, 1000)")
+            await page.evaluate("window.scrollBy(0, 1000)")
             await asyncio.sleep(1)
 
         events = []
-        event_cards = await self.page.query_selector_all(
+        event_cards = await page.query_selector_all(
             'a[class*="event-link content-link"]'
         )
 
@@ -286,26 +271,6 @@ class LumaScraper(BaseEventScraper):
             events.append(f"https://lu.ma/{event_url}")
 
         return events
-
-    async def scrape_events_by_keyword(self, keyword: Optional[str] = None, **kwargs):
-        """
-        Override the base class method for Luma since we don't use keywords.
-
-        Args:
-            keyword: Ignored for Luma
-            **kwargs: Additional arguments including location and max_events
-
-        Returns:
-            List of event URLs
-        """
-        # Just use location directly - ignore keyword
-        await self.setup()
-
-        try:
-            events = await self.extract_event_urls(**kwargs)
-            return events
-        finally:
-            await self.close()
 
 
 async def get_event_links(
