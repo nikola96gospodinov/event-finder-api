@@ -4,6 +4,7 @@ from urllib.parse import quote
 
 import requests
 
+from models.coordinates_model import Coordinates
 from models.user_profile_model import DistanceUnit, Location
 
 
@@ -13,13 +14,14 @@ def extract_postcode_from_address(address: str) -> str | None:
     return match.group(0) if match else None
 
 
-def get_address_coordinates(address: str | None) -> Location | None:
-    if address is None:
+def get_location_from_postcode(postcode: str | None) -> Location | None:
+    if postcode is None:
         return None
 
     url = (
         f"https://nominatim.openstreetmap.org/search"
-        f"?q={quote(address)}&format=json&polygon_kml=1&addressdetails=1"
+        f"?q={quote(postcode)}&format=json"
+        f"&polygon_kml=1&addressdetails=1"
     )
     headers = {
         # Required by Nominatim's usage policy
@@ -33,25 +35,10 @@ def get_address_coordinates(address: str | None) -> Location | None:
                 return Location(
                     latitude=float(result_json[0]["lat"]),
                     longitude=float(result_json[0]["lon"]),
+                    country=result_json[0]["address"]["country"],
+                    city=result_json[0]["address"]["city"],
+                    country_code=result_json[0]["address"]["country_code"],
                 )
-            else:
-                # Sometimes the address is not found, so we try to extract the postcode
-                # and search for that which usually works although it's not as accurate
-                postcode = extract_postcode_from_address(address)
-                if postcode:
-                    url = (
-                        f"https://nominatim.openstreetmap.org/search"
-                        f"?q={quote(postcode)}&format=json"
-                        f"&polygon_kml=1&addressdetails=1"
-                    )
-                    result = requests.get(url=url, headers=headers)
-                    if result.text.strip():
-                        result_json = result.json()
-                        if result_json and len(result_json) > 0:
-                            return Location(
-                                latitude=float(result_json[0]["lat"]),
-                                longitude=float(result_json[0]["lon"]),
-                            )
         else:
             print("Empty response received")
         return None
@@ -62,7 +49,7 @@ def get_address_coordinates(address: str | None) -> Location | None:
 
 
 def calculate_distance(
-    loc1: Location, loc2: Location, distance_unit: DistanceUnit
+    loc1: Coordinates, loc2: Coordinates, distance_unit: DistanceUnit
 ) -> float:
     """
     Calculate the distance between two locations using the Haversine formula.

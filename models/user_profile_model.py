@@ -8,6 +8,7 @@ from models.bias_options import (
     relationship_status_bias_options,
     sexual_orientation_bias_options,
 )
+from models.coordinates_model import Coordinates
 
 DistanceUnit = Literal["km", "miles"]
 
@@ -17,13 +18,10 @@ class DistanceThreshold(BaseModel):
     unit: DistanceUnit = Field(..., description="Distance unit (km or miles)")
 
 
-class Location(BaseModel):
-    latitude: Optional[float] = Field(
-        None, ge=-90, le=90, description="Latitude coordinate"
-    )
-    longitude: Optional[float] = Field(
-        None, ge=-180, le=180, description="Longitude coordinate"
-    )
+class Location(Coordinates):
+    country: Optional[str] = Field(None, description="Country")
+    city: Optional[str] = Field(None, description="City")
+    country_code: Optional[str] = Field(None, description="Country code")
 
 
 class StartEndTime(BaseModel):

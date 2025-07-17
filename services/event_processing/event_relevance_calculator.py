@@ -5,8 +5,9 @@ from typing import Literal, TypedDict
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 
+from models.coordinates_model import Coordinates
 from models.event_model import EventDetails, LocationOfEvent
-from models.user_profile_model import Location, UserProfile
+from models.user_profile_model import UserProfile
 from utils.address_utils import calculate_distance
 from utils.age_utils import get_age_from_birth_date
 from utils.request_utils import retry_with_backoff
@@ -231,7 +232,7 @@ class EventRelevanceCalculator:
         longitude = location_of_event.get("longitude")
         assert latitude is not None and longitude is not None
 
-        event_coordinates: Location = Location(
+        event_coordinates: Coordinates = Coordinates(
             latitude=float(latitude),
             longitude=float(longitude),
         )

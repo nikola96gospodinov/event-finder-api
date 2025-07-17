@@ -6,11 +6,10 @@ from models.bias_options import (
     relationship_status_bias_options,
     sexual_orientation_bias_options,
 )
+from models.coordinates_model import Coordinates
 
 
-class LocationOfEvent(TypedDict, total=False):
-    latitude: float
-    longitude: float
+class LocationOfEvent(Coordinates):
     full_address: str | None
 
 

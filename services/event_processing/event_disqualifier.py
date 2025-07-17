@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 
+from models.coordinates_model import Coordinates
 from models.event_model import EventDetails
-from models.user_profile_model import Location, UserProfile
+from models.user_profile_model import UserProfile
 from utils.address_utils import calculate_distance
 from utils.age_utils import get_age_from_birth_date
 from utils.date_utils import time_to_string
@@ -64,7 +65,9 @@ class EventDisqualifier:
         longitude = event_location.get("longitude")
         assert latitude is not None and longitude is not None
 
-        event_coordinates: Location = Location(latitude=latitude, longitude=longitude)
+        event_coordinates: Coordinates = Coordinates(
+            latitude=latitude, longitude=longitude
+        )
         distance = calculate_distance(
             loc1=self.user_profile.location,
             loc2=event_coordinates,
