@@ -309,7 +309,13 @@ class LumaScraper(BaseEventScraper):
 
 
 async def get_event_links(
-    search_keyword: str, eventbrite=True, meetup=True, luma=True
+    search_keyword: str,
+    eventbrite=True,
+    meetup=True,
+    luma=True,
+    country="United Kingdom",
+    city="London",
+    country_code="gb",
 ) -> list[str]:
     tasks = []
 
@@ -317,7 +323,7 @@ async def get_event_links(
         eventbrite_scraper = EventBriteScraper()
         tasks.append(
             eventbrite_scraper.scrape_events_by_keyword(
-                keyword=search_keyword, country="United Kingdom", city="London"
+                keyword=search_keyword, country=country, city=city
             )
         )
 
@@ -325,7 +331,7 @@ async def get_event_links(
         meetup_scraper = MeetupScraper()
         tasks.append(
             meetup_scraper.scrape_events_by_keyword(
-                keyword=search_keyword, location="London", country_code="gb"
+                keyword=search_keyword, location=city, country_code=country_code
             )
         )
 
@@ -333,7 +339,7 @@ async def get_event_links(
         luma_scraper = LumaScraper()
         tasks.append(
             luma_scraper.scrape_events_by_keyword(
-                keyword=search_keyword, location="London", max_events=40
+                keyword=search_keyword, location=city, max_events=40
             )
         )
 
