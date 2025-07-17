@@ -223,13 +223,13 @@ class EventRelevanceCalculator:
 
         if (
             not location_of_event
-            or not location_of_event.get("latitude")
-            or not location_of_event.get("longitude")
+            or not location_of_event.latitude
+            or not location_of_event.longitude
         ):
             return 0
 
-        latitude = location_of_event.get("latitude")
-        longitude = location_of_event.get("longitude")
+        latitude = location_of_event.latitude
+        longitude = location_of_event.longitude
         assert latitude is not None and longitude is not None
 
         event_coordinates: Coordinates = Coordinates(

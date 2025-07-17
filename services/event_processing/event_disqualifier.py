@@ -57,12 +57,12 @@ class EventDisqualifier:
             # If event has no location, we can't calculate distance
             return True
 
-        if not event_location.get("latitude") or not event_location.get("longitude"):
+        if not event_location.latitude or not event_location.longitude:
             # If event has no coordinates, we can't calculate distance
             return True
 
-        latitude = event_location.get("latitude")
-        longitude = event_location.get("longitude")
+        latitude = event_location.latitude
+        longitude = event_location.longitude
         assert latitude is not None and longitude is not None
 
         event_coordinates: Coordinates = Coordinates(
