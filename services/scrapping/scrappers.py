@@ -1,4 +1,5 @@
 import asyncio
+from typing import Optional
 
 from playwright.async_api import (
     Browser,
@@ -32,7 +33,7 @@ class BaseEventScraper:
         await self.browser.close()
         await self.playwright.stop()
 
-    async def extract_event_urls(self, keyword: str, **kwargs):
+    async def extract_event_urls(self, keyword: Optional[str] = None, **kwargs):
         """
         Extract URLs of events. To be implemented by subclasses.
 
@@ -45,7 +46,7 @@ class BaseEventScraper:
         """
         raise NotImplementedError("Subclasses must implement extract_event_urls")
 
-    async def scrape_events_by_keyword(self, keyword: str, **kwargs):
+    async def scrape_events_by_keyword(self, keyword: Optional[str] = None, **kwargs):
         """
         Scrape event URLs for a single keyword.
 
@@ -240,7 +241,7 @@ class LumaScraper(BaseEventScraper):
     def __init__(self, headless: bool = True):
         super().__init__(base_url="https://lu.ma", headless=headless)
 
-    async def extract_event_urls(self, keyword: str, **kwargs):
+    async def extract_event_urls(self, keyword: Optional[str] = None, **kwargs):
         """
         Extract URLs of events from Luma.
 
@@ -286,7 +287,7 @@ class LumaScraper(BaseEventScraper):
 
         return events
 
-    async def scrape_events_by_keyword(self, keyword: str, **kwargs):
+    async def scrape_events_by_keyword(self, keyword: Optional[str] = None, **kwargs):
         """
         Override the base class method for Luma since we don't use keywords.
 
