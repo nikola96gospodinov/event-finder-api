@@ -5,6 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from models.user_profile_model import UserProfile
 from utils.age_utils import get_age_bracket, get_age_from_birth_date
+from utils.request_utils import retry_with_backoff
 
 
 def remove_prohibited_queries(queries: List[str]) -> List[str]:
@@ -100,8 +101,11 @@ def get_search_keywords_for_event_sites(
 
     prompt = ChatPromptTemplate.from_template(prompt_template)
     chain = prompt | model
-    response = chain.invoke(
-        {
+    response = retry_with_backoff(
+        chain.invoke,
+        max_retries=5,
+        base_delay=2.0,
+        input={
             "interests": user_profile.interests,
             "goals": user_profile.goals,
             "age_bracket": get_age_bracket(
@@ -111,7 +115,7 @@ def get_search_keywords_for_event_sites(
             "gender": user_profile.gender,
             "is_lgbtq": user_profile.sexual_orientation != "straight",
             "is_single": user_profile.relationship_status == "single",
-        }
+        },
     )
 
     response_str = (
