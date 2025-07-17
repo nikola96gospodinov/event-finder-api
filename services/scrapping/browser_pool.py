@@ -5,6 +5,9 @@ from typing import Dict, Optional
 from playwright.async_api import Browser, BrowserContext, Playwright, async_playwright
 
 from core.browser_config import BrowserConfig
+from core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class BrowserPool:
@@ -27,7 +30,7 @@ class BrowserPool:
         """Initialize the browser pool."""
         if self._playwright is None:
             self._playwright = await async_playwright().start()
-            print("Browser pool initialized")
+            logger.info("Browser pool initialized")
 
     async def cleanup(self):
         """Clean up all browser instances."""
@@ -36,24 +39,24 @@ class BrowserPool:
                 try:
                     await context.close()
                 except Exception as e:
-                    print(f"Error closing context: {e}")
+                    logger.error(f"Error closing context: {e}")
 
             for browser in self._browsers.values():
                 try:
                     await browser.close()
                 except Exception as e:
-                    print(f"Error closing browser: {e}")
+                    logger.error(f"Error closing browser: {e}")
 
             if self._playwright:
                 try:
                     await self._playwright.stop()
                 except Exception as e:
-                    print(f"Error stopping playwright: {e}")
+                    logger.error(f"Error stopping playwright: {e}")
 
             self._browsers.clear()
             self._contexts.clear()
             self._playwright = None
-            print("Browser pool cleaned up")
+            logger.info("Browser pool cleaned up")
 
     @asynccontextmanager
     async def get_browser_context(self):
@@ -96,7 +99,7 @@ class BrowserPool:
                 try:
                     await context.close()
                 except Exception as e:
-                    print(f"Error closing context: {e}")
+                    logger.error(f"Error closing context: {e}")
                 finally:
                     self._contexts.pop(browser_id, None)
 
@@ -111,7 +114,7 @@ class BrowserPool:
                 try:
                     await page.close()
                 except Exception as e:
-                    print(f"Error closing page: {e}")
+                    logger.error(f"Error closing page: {e}")
 
 
 # Global browser pool instance

@@ -3,7 +3,11 @@ from typing import Optional
 
 from playwright.async_api import Page
 
+from core.logging_config import get_logger
+
 from .browser_pool import get_browser_pool
+
+logger = get_logger(__name__)
 
 
 class BaseEventScraper:
@@ -78,7 +82,7 @@ class EventBriteScraper(BaseEventScraper):
             f"{country.lower()}--{city.lower()}/"
             f"{keyword}/?q={keyword}"
         )
-        print(f"Navigating to: {search_url}")
+        logger.info(f"Navigating to: {search_url}")
 
         await page.goto(search_url)
 
@@ -121,7 +125,7 @@ class EventBriteScraper(BaseEventScraper):
                 count += 1
 
             except Exception as e:
-                print(f"Error extracting promoted event: {e}")
+                logger.error(f"Error extracting promoted event: {e}")
 
         # Process regular events
         count = 0
@@ -145,7 +149,7 @@ class EventBriteScraper(BaseEventScraper):
                 count += 1
 
             except Exception as e:
-                print(f"Error extracting regular event: {e}")
+                logger.error(f"Error extracting regular event: {e}")
 
         return events
 
@@ -185,7 +189,7 @@ class MeetupScraper(BaseEventScraper):
             f"&source=EVENTS"
         )
 
-        print(f"Navigating to: {search_url}")
+        logger.info(f"Navigating to: {search_url}")
         await page.goto(search_url)
 
         # Wait for the events to load
@@ -214,7 +218,7 @@ class MeetupScraper(BaseEventScraper):
                     )
                     events.append(full_url)
             except Exception as e:
-                print(f"Error extracting meetup URL: {e}")
+                logger.error(f"Error extracting meetup URL: {e}")
 
         return events
 
@@ -243,7 +247,7 @@ class LumaScraper(BaseEventScraper):
         max_events = kwargs.get("max_events", 25)
 
         search_url = f"{self.base_url}/{location}".lower()
-        print(f"Navigating to: {search_url}")
+        logger.info(f"Navigating to: {search_url}")
 
         await page.goto(search_url)
 
@@ -314,12 +318,12 @@ async def get_event_links(
 
     for result in results:
         if isinstance(result, Exception):
-            print(f"Scraper error: {result}")
+            logger.error(f"Scraper error: {result}")
             continue
 
         if isinstance(result, list):
             event_links.update(result)
         else:
-            print(f"Unexpected result type: {type(result)}")
+            logger.error(f"Unexpected result type: {type(result)}")
 
     return list(event_links)

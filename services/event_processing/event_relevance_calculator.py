@@ -5,12 +5,15 @@ from typing import Literal, TypedDict
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 
+from core.logging_config import get_logger
 from models.coordinates_model import Coordinates
 from models.event_model import EventDetails, LocationOfEvent
 from models.user_profile_model import UserProfile
 from utils.address_utils import calculate_distance
 from utils.age_utils import get_age_from_birth_date
 from utils.request_utils import retry_with_backoff
+
+logger = get_logger(__name__)
 
 
 class Interests(TypedDict):
@@ -164,7 +167,7 @@ class EventRelevanceCalculator:
                 str(result.content) if hasattr(result, "content") else str(result)
             )
 
-            print(f"Event relevance score: {response_str}")
+            logger.info(f"Event relevance score: {response_str}")
 
             text_to_parse = response_str
 
@@ -197,11 +200,11 @@ class EventRelevanceCalculator:
 
                 return interests_score + goals_score - industry_mismatch_score
             except (SyntaxError, ValueError) as e:
-                print(f"Error parsing scoring system: {e}")
+                logger.error(f"Error parsing scoring system: {e}")
                 return 0
 
         except Exception as e:
-            print(f"Unexpected error: {str(e)}")
+            logger.error(f"Unexpected error: {str(e)}")
             return 0
 
     def _calculate_price_score(

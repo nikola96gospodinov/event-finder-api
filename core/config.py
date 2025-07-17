@@ -6,6 +6,9 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "AI Agent for Event Discovery"
 
+    # Logging
+    LOG_LEVEL: str = "INFO"
+
     # Supabase
     SUPABASE_URL: str = ""
     SUPABASE_ANON_KEY: str = ""

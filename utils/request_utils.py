@@ -4,6 +4,10 @@ from typing import Any, Callable, TypeVar
 
 from google.api_core.exceptions import ResourceExhausted
 
+from core.logging_config import get_logger
+
+logger = get_logger(__name__)
+
 T = TypeVar("T")
 
 
@@ -38,14 +42,14 @@ def retry_with_backoff(
         except ResourceExhausted:
             retry_count += 1
             if retry_count >= max_retries:
-                print(f"Max retries ({max_retries}) exceeded.")
+                logger.error(f"Max retries ({max_retries}) exceeded.")
                 raise
 
             delay = base_delay * (2 ** (retry_count - 1))
             jitter = random.uniform(0, 0.1 * delay)
             total_delay = delay + jitter
 
-            print(
+            logger.info(
                 f"Rate limit hit. Retrying in {total_delay:.2f} seconds "
                 f"(attempt {retry_count}/{max_retries})"
             )

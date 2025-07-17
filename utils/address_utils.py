@@ -4,8 +4,11 @@ from urllib.parse import quote
 
 import requests
 
+from core.logging_config import get_logger
 from models.coordinates_model import Coordinates
 from models.user_profile_model import DistanceUnit, Location
+
+logger = get_logger(__name__)
 
 
 def extract_postcode_from_address(address: str) -> str | None:
@@ -40,11 +43,11 @@ def get_location_from_postcode(postcode: str | None) -> Location | None:
                     country_code=result_json[0]["address"]["country_code"],
                 )
         else:
-            print("Empty response received")
+            logger.info("Empty response received")
         return None
     except Exception as e:
-        print(f"Error getting address coordinates: {e}")
-        print(f"Error type: {type(e)}")
+        logger.error(f"Error getting address coordinates: {e}")
+        logger.error(f"Error type: {type(e)}")
         return None
 
 
