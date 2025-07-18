@@ -255,37 +255,37 @@ class EventRelevanceCalculator:
         score = 0
         user_age = get_age_from_birth_date(self.user_profile.birth_date)
 
-        if event_details["age_range"] and user_age:
+        if event_details.age_range and user_age:
             # +18 exception
             if (
                 user_age >= 18
-                and event_details["age_range"]["min_age"] == 18
-                and not event_details["age_range"]["max_age"]
+                and event_details.age_range.min_age == 18
+                and not event_details.age_range.max_age
             ):
                 score += 1
             else:
                 score += 4
 
-        if event_details["gender_bias"] and self.user_profile.gender:
-            if len(event_details["gender_bias"]) == 1:
+        if event_details.gender_bias and self.user_profile.gender:
+            if len(event_details.gender_bias) == 1:
                 score += 3
             else:
                 score += 1
 
         if (
-            event_details["relationship_status_bias"]
+            event_details.relationship_status_bias
             and self.user_profile.relationship_status
         ):
-            if len(event_details["relationship_status_bias"]) == 1:
+            if len(event_details.relationship_status_bias) == 1:
                 score += 3
             else:
                 score += 1
 
         if (
-            event_details["sexual_orientation_bias"]
+            event_details.sexual_orientation_bias
             and self.user_profile.sexual_orientation
         ):
-            if len(event_details["sexual_orientation_bias"]) == 1:
+            if len(event_details.sexual_orientation_bias) == 1:
                 score += 3
             else:
                 score += 1
@@ -302,11 +302,9 @@ class EventRelevanceCalculator:
             webpage_content
         )
         price_score = self._calculate_price_score(
-            event_details["price_of_event"], self.user_profile.budget
+            event_details.price_of_event, self.user_profile.budget
         )
-        distance_score = self._calculate_distance_score(
-            event_details["location_of_event"]
-        )
+        distance_score = self._calculate_distance_score(event_details.location_of_event)
         demographic_score = self._calculate_demographic_score(event_details)
 
         total_score = relevance_score + price_score + distance_score + demographic_score

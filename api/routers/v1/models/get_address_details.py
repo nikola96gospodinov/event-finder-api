@@ -8,7 +8,7 @@ from .common import ErrorResponse
 class AddressDetailsResponse(BaseModel):
     """Response model for get address details endpoint"""
 
-    location: Location
+    location: Location | None
 
 
 __all__ = ["AddressDetailsResponse", "ErrorResponse"]

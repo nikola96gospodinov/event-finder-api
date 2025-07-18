@@ -11,9 +11,9 @@ def remove_duplicates_based_on_title(events: list[EventResult]) -> list[EventRes
     unique_events = []
     seen_titles = set()
     for event in events:
-        if event["event_details"]["title"] not in seen_titles:
+        if event.event_details.title not in seen_titles:
             unique_events.append(event)
-            seen_titles.add(event["event_details"]["title"])
+            seen_titles.add(event.event_details.title)
 
     return unique_events
 
@@ -22,9 +22,9 @@ def filter_events_by_relevance(
     events: list[EventResult], only_highly_relevant: bool = False
 ) -> list[EventResult]:
     if only_highly_relevant:
-        return [event for event in events if event["relevance"] > 40]
+        return [event for event in events if event.relevance > 40]
     else:
-        return [event for event in events if event["relevance"] > 0]
+        return [event for event in events if event.relevance > 0]
 
 
 def get_seconds_until_event(date_of_event: str | None, start_time: str | None) -> int:

@@ -114,26 +114,27 @@ def extract_event_details(
         return None
 
     try:
-        event_details_result: EventDetails | None = ast.literal_eval(event_details)
+        event_details_dict = ast.literal_eval(event_details)
+        event_details_result: EventDetails | None = EventDetails(**event_details_dict)
     except (SyntaxError, ValueError) as e:
         logger.error(f"Error parsing event details: {e}")
         logger.error(f"Original event details: {og_event_details}")
         logger.error(f"Raw event details: {event_details}")
         return None
 
-    if event_details_result and event_details_result["location_of_event"].full_address:
+    if event_details_result and event_details_result.location_of_event.full_address:
         coordinates = get_location_from_postcode(
-            event_details_result["location_of_event"].full_address
+            event_details_result.location_of_event.full_address
         )
         if (
             coordinates
             and coordinates.latitude is not None
             and coordinates.longitude is not None
         ):
-            event_details_result["location_of_event"].latitude = coordinates.latitude
-            event_details_result["location_of_event"].longitude = coordinates.longitude
+            event_details_result.location_of_event.latitude = coordinates.latitude
+            event_details_result.location_of_event.longitude = coordinates.longitude
         else:
-            event_details_result["location_of_event"].full_address = None
+            event_details_result.location_of_event.full_address = None
 
     logger.info("Event details:")
     logger.info(event_details_result)

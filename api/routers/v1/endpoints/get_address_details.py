@@ -1,29 +1,28 @@
 from fastapi import APIRouter, HTTPException
 
-from models.user_profile_model import Location
 from utils.address_utils import get_location_from_postcode
 
-from ..models.get_address_details import ErrorResponse
+from ..models.get_address_details import AddressDetailsResponse, ErrorResponse
 
 router = APIRouter()
 
 
 @router.get(
     "/address-details",
-    response_model=Location,
+    response_model=AddressDetailsResponse,
     responses={
         400: {"model": ErrorResponse, "description": "Bad Request"},
         404: {"model": ErrorResponse, "description": "Not Found"},
         500: {"model": ErrorResponse, "description": "Internal Server Error"},
     },
 )
-async def get_address_details(postcode: str) -> Location | None:
+async def get_address_details(postcode: str) -> AddressDetailsResponse:
     try:
         location = get_location_from_postcode(postcode)
         if location is None:
             raise HTTPException(status_code=404, detail="Postcode not found")
 
-        return location
+        return AddressDetailsResponse(location=location)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
