@@ -12,3 +12,4 @@ exclude =
 per-file-ignores = 
     services/search_words/get_search_words_for_event_sites.py:E501
     services/event_processing/event_relevance_calculator.py:E501
+    services/event_processing/extract_event_details.py:E501
