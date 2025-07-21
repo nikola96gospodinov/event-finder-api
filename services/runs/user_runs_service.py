@@ -3,7 +3,10 @@ from typing import Optional
 
 from supabase import Client
 
+from core.logging_config import get_logger
 from core.supabase_client import supabase_base
+
+logger = get_logger(__name__)
 
 
 class UserRunService:
@@ -24,7 +27,7 @@ class UserRunService:
         run limit (max 2 runs per calendar month)
         """
         if not self.client:
-            print("Supabase client not initialized")
+            logger.error("Supabase client not initialized")
             return False
 
         try:
@@ -51,11 +54,11 @@ class UserRunService:
                             ):
                                 current_month_runs += 1
                         except (ValueError, TypeError) as e:
-                            print(f"Error parsing run_date: {e}")
+                            logger.error(f"Error parsing run_date: {e}")
                             continue
 
                 if current_month_runs >= self.MAX_RUNS_PER_MONTH:
-                    print(
+                    logger.info(
                         (
                             f"User {user_id} has already run {current_month_runs} "
                             f"times this month (limit: {self.MAX_RUNS_PER_MONTH})"
@@ -63,26 +66,26 @@ class UserRunService:
                     )
                     return False
                 else:
-                    print(
+                    logger.info(
                         f"User {user_id} has {current_month_runs} runs this month, can "
                         f"run {self.MAX_RUNS_PER_MONTH - current_month_runs} more times"
                     )
                     return True
             else:
-                print(
+                logger.info(
                     f"User {user_id} has no previous runs, can run up to "
                     f"{self.MAX_RUNS_PER_MONTH} times this month"
                 )
                 return True
 
         except Exception as e:
-            print(f"Error checking user run limit: {e}")
+            logger.error(f"Error checking user run limit: {e}")
             return False
 
     async def record_user_run(self, user_id: str) -> bool:
         """Record a new run for the user"""
         if not self.client:
-            print("Supabase client not initialized")
+            logger.error("Supabase client not initialized")
             return False
 
         try:
@@ -93,14 +96,14 @@ class UserRunService:
             )
 
             if response.data:
-                print(f"Successfully recorded run for user {user_id}")
+                logger.info(f"Successfully recorded run for user {user_id}")
                 return True
             else:
-                print(f"Failed to record run for user {user_id}")
+                logger.error(f"Failed to record run for user {user_id}")
                 return False
 
         except Exception as e:
-            print(f"Error recording user run: {e}")
+            logger.error(f"Error recording user run: {e}")
             return False
 
 

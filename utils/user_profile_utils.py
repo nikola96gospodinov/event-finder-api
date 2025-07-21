@@ -1,9 +1,12 @@
 from datetime import datetime
 from typing import Any, Dict, Optional, cast
 
+from core.logging_config import get_logger
 from models.user_profile_model import UserProfile
 from utils.address_utils import get_location_from_postcode
 from utils.date_utils import time_to_string
+
+logger = get_logger(__name__)
 
 
 def convert_to_user_profile(
@@ -76,5 +79,5 @@ def convert_to_user_profile(
             },
         )
     except Exception as e:
-        print(f"Error converting profile data: {e}")
+        logger.error(f"Error converting profile data: {e}")
         return None

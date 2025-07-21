@@ -3,6 +3,9 @@ from typing import Optional
 from supabase import Client, create_client
 
 from core.config import settings
+from core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class SupabaseBaseClient:
@@ -51,12 +54,12 @@ class SupabaseBaseClient:
         if self.supabase_url and self.supabase_key:
             try:
                 self._client = create_client(self.supabase_url, self.supabase_key)
-                print("Supabase client initialized successfully")
+                logger.info("Supabase client initialized successfully")
             except Exception as e:
-                print(f"Failed to initialize Supabase client: {e}")
+                logger.error(f"Failed to initialize Supabase client: {e}")
                 self._client = None
         else:
-            print("Supabase credentials not found in environment variables")
+            logger.error("Supabase credentials not found in environment variables")
             self._client = None
 
     @property

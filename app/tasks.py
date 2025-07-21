@@ -2,8 +2,11 @@ import asyncio
 from typing import Any, Dict
 
 from app.celery_app import celery_app
+from core.logging_config import get_logger
 from models.user_profile_model import UserProfile
 from services.agent.agent import agent
+
+logger = get_logger(__name__)
 
 
 @celery_app.task(name="tasks.run_agent_task")
@@ -24,6 +27,5 @@ def run_agent_task(
         finally:
             loop.close()
     except Exception as e:
-        # Log the error and re-raise
-        print(f"Error in run_agent_task: {str(e)}")
+        logger.error(f"Error in run_agent_task: {str(e)}")
         raise

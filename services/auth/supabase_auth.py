@@ -4,9 +4,12 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from supabase import Client
 
+from core.logging_config import get_logger
 from core.supabase_client import supabase_base
 from models.user_profile_model import UserProfile
 from utils.user_profile_utils import convert_to_user_profile
+
+logger = get_logger(__name__)
 
 security = HTTPBearer()
 
@@ -24,7 +27,7 @@ class SupabaseAuthService:
     async def get_user_from_token(self, token: str) -> Optional[Dict[str, Any]]:
         """Get user information from Supabase token"""
         if not self.client:
-            print("Supabase client not initialized")
+            logger.error("Supabase client not initialized")
             return None
 
         try:
@@ -34,13 +37,13 @@ class SupabaseAuthService:
                 return user_response.user.model_dump()
             return None
         except Exception as e:
-            print(f"Error getting user from token: {e}")
+            logger.error(f"Error getting user from token: {e}")
             return None
 
     async def get_raw_profile_data(self, user_id: str) -> Optional[Dict[str, Any]]:
         """Get raw profile data from Supabase database"""
         if not self.client:
-            print("Supabase client not initialized")
+            logger.error("Supabase client not initialized")
             return None
 
         try:
@@ -54,11 +57,11 @@ class SupabaseAuthService:
             if response.data and len(response.data) > 0:
                 return cast(Dict[str, Any], response.data[0])
             else:
-                print(f"No profile found for user_id: {user_id}")
+                logger.error(f"No profile found for user_id: {user_id}")
                 return None
 
         except Exception as e:
-            print(f"Error getting user profile: {e}")
+            logger.error(f"Error getting user profile: {e}")
             return None
 
 
