@@ -2,7 +2,11 @@ from typing import Dict
 
 from fastapi import APIRouter
 
+from .endpoints.run_agent import router as run_agent_router
+
 router = APIRouter()
+
+router.include_router(run_agent_router)
 
 
 @router.get("/")

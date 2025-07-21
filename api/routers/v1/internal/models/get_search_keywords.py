@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from .common import ErrorResponse
+from api.routers.v1.models.common import ErrorResponse
 
 
 class SearchKeywordsResponse(BaseModel):
