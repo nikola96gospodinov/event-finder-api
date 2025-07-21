@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
-from api.routers.v1 import external, internal
+from api.routers.v1.external import external
+from api.routers.v1.internal import internal
 
 v1_router = APIRouter()
 

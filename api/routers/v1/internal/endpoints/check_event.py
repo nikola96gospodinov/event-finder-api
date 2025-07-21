@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException
 
-from api.routers.v1.models.post_check_event import ErrorResponse, PostCheckEventResponse
 from core.llm import gemma_3_27b
 from models.user_profile_model import UserProfile
 from services.event_processing.check_event import check_event as check_event_service
+
+from ..models.post_check_event import ErrorResponse, PostCheckEventResponse
 
 router = APIRouter()
 
