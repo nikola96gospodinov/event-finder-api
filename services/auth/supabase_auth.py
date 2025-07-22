@@ -99,4 +99,12 @@ async def get_current_user_profile(
     if not profile_data:
         return None
 
-    return convert_to_user_profile(profile_data, user)
+    user_profile = convert_to_user_profile(profile_data, user)
+
+    if not user_profile:
+        raise HTTPException(
+            status_code=400,
+            detail="User profile not found. Please complete your profile setup first.",
+        )
+
+    return user_profile

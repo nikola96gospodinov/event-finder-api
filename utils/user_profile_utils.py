@@ -1,8 +1,14 @@
 from datetime import datetime
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional
 
 from core.logging_config import get_logger
-from models.user_profile_model import UserProfile
+from models.user_profile_model import (
+    AcceptableTimes,
+    DistanceThreshold,
+    Location,
+    StartEndTime,
+    UserProfile,
+)
 from utils.address_utils import get_location_from_postcode
 from utils.date_utils import time_to_string
 
@@ -27,23 +33,25 @@ def convert_to_user_profile(
         weekend_start = profile_data.get("weekend_start_time")
         weekend_end = profile_data.get("weekend_end_time")
 
-        acceptable_times = {
-            "weekdays": {
-                "start": time_to_string(weekday_start) or "17:00",
-                "end": time_to_string(weekday_end) or "22:00",
-            },
-            "weekends": {
-                "start": time_to_string(weekend_start) or "8:00",
-                "end": time_to_string(weekend_end) or "23:00",
-            },
-        }
+        acceptable_times = AcceptableTimes(
+            weekdays=StartEndTime(
+                start=time_to_string(weekday_start) or "17:00",
+                end=time_to_string(weekday_end) or "22:00",
+            ),
+            weekends=StartEndTime(
+                start=time_to_string(weekend_start) or "8:00",
+                end=time_to_string(weekend_end) or "23:00",
+            ),
+        )
 
-        distance_threshold = {
-            "distance_threshold": profile_data.get("distance_threshold_value", 20),
-            "unit": profile_data.get("distance_threshold_unit", "miles"),
-        }
+        distance_threshold = DistanceThreshold(
+            distance_threshold=profile_data.get("distance_threshold_value", 20),
+            unit=profile_data.get("distance_threshold_unit", "miles"),
+        )
 
-        location = get_location_from_postcode(profile_data.get("postcode"))
+        location = get_location_from_postcode(profile_data.get("postcode")) or Location(
+            latitude=0, longitude=0, country="", city="", country_code=""
+        )
 
         budget_value = profile_data.get("budget", 0)
         willingness_to_pay = budget_value > 0
@@ -52,32 +60,26 @@ def convert_to_user_profile(
 
         email = user_data.get("email") if user_data else ""
 
-        return cast(
-            UserProfile,
-            {
-                "birth_date": birth_date,
-                "gender": profile_data.get("gender", "male"),
-                "sexual_orientation": profile_data.get(
-                    "sexual_orientation", "straight"
-                ),
-                "relationship_status": profile_data.get(
-                    "relationship_status", "single"
-                ),
-                "willingness_to_pay": willingness_to_pay,
-                "budget": budget_value,
-                "willingness_for_online": profile_data.get(
-                    "willingness_for_online", False
-                ),
-                "acceptable_times": acceptable_times,
-                "location": location,
-                "distance_threshold": distance_threshold,
-                "time_commitment_in_minutes": time_commitment_in_minutes,
-                "interests": profile_data.get("interests", []),
-                "goals": profile_data.get("goals", []),
-                "occupation": profile_data.get("occupation", ""),
-                "email": email,
-            },
+        willingness_for_online = profile_data.get("willingness_for_online") or False
+
+        return UserProfile(
+            birth_date=birth_date,
+            gender=profile_data.get("gender", "male"),
+            sexual_orientation=profile_data.get("sexual_orientation", "straight"),
+            relationship_status=profile_data.get("relationship_status", "single"),
+            willingness_to_pay=willingness_to_pay,
+            budget=budget_value,
+            willingness_for_online=willingness_for_online,
+            acceptable_times=acceptable_times,
+            location=location,
+            distance_threshold=distance_threshold,
+            time_commitment_in_minutes=time_commitment_in_minutes,
+            interests=profile_data.get("interests", []),
+            goals=profile_data.get("goals", []),
+            occupation=profile_data.get("occupation", ""),
+            email=email or "",
         )
+
     except Exception as e:
         logger.error(f"Error converting profile data: {e}")
         return None
