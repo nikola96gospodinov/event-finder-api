@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PORT=${PORT:-8000}
+PORT=${PORT:-8080}
 
 echo "Starting Event Finder API on port $PORT"
 

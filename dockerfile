@@ -22,10 +22,14 @@ RUN mkdir -p /home/appuser/.cache && \
     cp -r /root/.cache/ms-playwright /home/appuser/.cache/ && \
     chown -R appuser:appuser /home/appuser/.cache/ms-playwright
 
-USER appuser
-
 COPY . .
+
+# Make startup script executable and set ownership
+RUN chmod +x startup.sh && \
+    chown appuser:appuser startup.sh
+
+USER appuser
 
 EXPOSE 8080
 
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["./startup.sh"]

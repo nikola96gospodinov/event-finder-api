@@ -25,4 +25,4 @@ celery_app.conf.update(
     result_expires=60 * 60 * 24,
 )
 
-celery_app.autodiscover_tasks(["tasks"])
+celery_app.autodiscover_tasks(["app.tasks"])

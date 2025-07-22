@@ -51,6 +51,3 @@ Thumbs.db
 # Documentation
 README.md
 *.md
-
-# Development files
-startup.sh
