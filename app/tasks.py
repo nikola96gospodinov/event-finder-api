@@ -15,10 +15,8 @@ def run_agent_task(
 ):
     """Run agent task with proper serialization handling"""
     try:
-        # Convert dict back to UserProfile model
         user_profile = UserProfile(**user_profile_dict)
 
-        # Run the agent in an event loop
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
