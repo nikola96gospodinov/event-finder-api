@@ -122,7 +122,11 @@ def extract_event_details(
         logger.error(f"Raw event details: {event_details}")
         return None
 
-    if event_details_result and event_details_result.location_of_event.full_address:
+    if (
+        event_details_result
+        and event_details_result.location_of_event
+        and event_details_result.location_of_event.full_address
+    ):
         coordinates = get_location_from_postcode(
             event_details_result.location_of_event.full_address
         )

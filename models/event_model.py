@@ -29,7 +29,7 @@ class EventDetails(BaseModel):
     date_of_event: Optional[str] = None
     start_time: Optional[str] = None
     end_time: Optional[str] = None
-    location_of_event: LocationOfEvent
+    location_of_event: Optional[LocationOfEvent] = None
     price_of_event: Union[float, int]
     event_format: Optional[list[Literal[event_format_options]]] = None
     is_sold_out: Optional[bool] = None

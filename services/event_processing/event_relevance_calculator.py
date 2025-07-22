@@ -1,6 +1,6 @@
 import ast
 import re
-from typing import Literal, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
@@ -220,7 +220,9 @@ class EventRelevanceCalculator:
             price_ratio = 1 - (price_of_event / budget)
             return 5 * price_ratio
 
-    def _calculate_distance_score(self, location_of_event: LocationOfEvent) -> float:
+    def _calculate_distance_score(
+        self, location_of_event: Optional[LocationOfEvent]
+    ) -> float:
         if not self.user_profile.location or not self.user_profile.distance_threshold:
             return 0
 
