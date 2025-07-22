@@ -15,6 +15,7 @@ router = APIRouter()
     response_model=PostRunAgentResponse,
     responses={
         400: {"model": ErrorResponse, "description": "Bad Request"},
+        401: {"model": ErrorResponse, "description": "Unauthorized"},
         429: {"model": ErrorResponse, "description": "Too Many Requests"},
         500: {"model": ErrorResponse, "description": "Internal Server Error"},
     },
@@ -57,6 +58,8 @@ async def run_agent(
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException as e:
+        raise HTTPException(status_code=401, detail=f"Unauthorized: {str(e)}")
     except HTTPException as e:
         raise HTTPException(status_code=429, detail=f"Too Many Requests: {str(e)}")
     except Exception as e:

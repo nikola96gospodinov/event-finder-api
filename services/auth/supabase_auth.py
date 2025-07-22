@@ -91,7 +91,9 @@ async def get_current_user_profile(
     """Dependency to get current user's profile"""
     user_id = user.get("id")
     if not user_id:
-        raise HTTPException(status_code=400, detail="User ID not found in token")
+        raise HTTPException(
+            status_code=401, detail="Invalid authentication credentials"
+        )
 
     profile_data = await auth_service.get_raw_profile_data(user_id)
     if not profile_data:
