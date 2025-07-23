@@ -3,15 +3,13 @@ from playwright.async_api import async_playwright
 from core.llm import gemma_3_27b
 from core.logging_config import get_logger
 from models.user_profile_model import UserProfile
-
-# from services.email.send_email import post_message
+from services.email.send_email import post_message
 from services.event_processing.check_event import check_event
 from services.scrapping.scrappers import get_event_links
 from services.search_words.get_search_words_for_event_sites import (
     get_search_keywords_for_event_sites,
 )
-
-# from utils.email_utils import format_events_for_email
+from utils.email_utils import format_events_for_email
 from utils.event_utils import (
     filter_events_by_relevance,
     remove_duplicates_based_on_title,
@@ -60,10 +58,10 @@ async def agent(user_profile: UserProfile, only_highly_relevant: bool = False):
             )
         )
 
-    # html = format_events_for_email(events, user_profile)
-    # post_message(
-    #     user_profile.email,
-    #     "test@test.com",
-    #     "Events specifically picked for you! 🤩",
-    #     html,
-    # )
+    html = format_events_for_email(events, user_profile)
+    post_message(
+        user_profile.email,
+        "test@test.com",
+        "Events specifically picked for you! 🤩",
+        html,
+    )
