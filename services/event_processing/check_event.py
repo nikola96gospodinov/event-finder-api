@@ -31,13 +31,14 @@ async def check_event(
     cache_key = f"event_details:{event_link}"
     cached_result = redis_client.get(cache_key)
 
+    webpage_content = await scrap_page(event_link, browser)
+
     if cached_result is not None:
         logger.info("Retrieved event from cache:")
         event_details_dict = json.loads(str(cached_result))
         event_details = EventDetails(**event_details_dict)
         logger.info(event_details)
     else:
-        webpage_content = await scrap_page(event_link, browser)
         temp_event_details = extract_event_details(webpage_content, model)
 
         if temp_event_details is None:
