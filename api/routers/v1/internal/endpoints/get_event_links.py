@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, HTTPException
 
 from services.scrapping.scrappers import get_event_links as get_event_links_service
@@ -7,7 +9,7 @@ from ..models.get_event_links import ErrorResponse, EventLinksResponse
 router = APIRouter()
 
 
-@router.get(
+@router.post(
     "/event-links",
     response_model=EventLinksResponse,
     responses={
@@ -16,7 +18,7 @@ router = APIRouter()
     },
 )
 async def get_event_links(
-    keyword: str,
+    keywords: List[str],
     eventbrite: bool = True,
     meetup: bool = True,
     luma: bool = True,
@@ -26,7 +28,7 @@ async def get_event_links(
 ) -> EventLinksResponse:
     try:
         event_links = await get_event_links_service(
-            keyword, eventbrite, meetup, luma, country, city, country_code
+            keywords, eventbrite, meetup, luma, country, city, country_code
         )
         return EventLinksResponse(event_links=event_links)
     except ValueError as e:

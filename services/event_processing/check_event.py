@@ -1,6 +1,8 @@
 import json
+from typing import Optional
 
 from langchain_core.language_models.chat_models import BaseChatModel
+from playwright.async_api import Browser
 
 from core.logging_config import get_logger
 from core.redis_client import redis_client
@@ -21,6 +23,7 @@ async def check_event(
     event_link: str,
     user_profile: UserProfile,
     model: BaseChatModel,
+    browser: Optional[Browser],
 ) -> EventResult | None:
     logger.info(f"Checking event: {event_link}")
 
@@ -28,14 +31,13 @@ async def check_event(
     cache_key = f"event_details:{event_link}"
     cached_result = redis_client.get(cache_key)
 
-    webpage_content = await scrap_page(event_link)
-
     if cached_result is not None:
         logger.info("Retrieved event from cache:")
         event_details_dict = json.loads(str(cached_result))
         event_details = EventDetails(**event_details_dict)
         logger.info(event_details)
     else:
+        webpage_content = await scrap_page(event_link, browser)
         temp_event_details = extract_event_details(webpage_content, model)
 
         if temp_event_details is None:

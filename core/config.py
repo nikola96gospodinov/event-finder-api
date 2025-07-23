@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     UPSTASH_REDIS_REST_TOKEN: str = ""
 
     # Browser Configuration
-    BROWSER_POOL_SIZE: int = 3
+    BROWSER_POOL_SIZE: int = 1
     BROWSER_HEADLESS: bool = True
     BROWSER_NAVIGATION_TIMEOUT: int = 30000
     BROWSER_PAGE_TIMEOUT: int = 10000
