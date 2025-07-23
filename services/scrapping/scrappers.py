@@ -77,10 +77,14 @@ class EventBriteScraper(BaseEventScraper):
         Returns:
             List of event URLs
         """
+        formatted_country = country.lower().replace(" ", "-")
+        formatted_city = city.lower().replace(" ", "-")
+        formatted_keyword = keyword.lower().replace(" ", "-")
+
         search_url = (
             f"{self.base_url}/d/"
-            f"{country.lower()}--{city.lower()}/"
-            f"{keyword}/?q={keyword}"
+            f"{formatted_country}--{formatted_city}/"
+            f"{formatted_keyword}"
         )
         logger.info(f"Navigating to: {search_url}")
 
@@ -88,7 +92,7 @@ class EventBriteScraper(BaseEventScraper):
 
         await page.wait_for_selector(
             'ul[class*="SearchResultPanelContentEventCardList-module__eventList"]',
-            timeout=5000,
+            timeout=10_000,
         )
 
         await asyncio.sleep(1)
@@ -193,7 +197,7 @@ class MeetupScraper(BaseEventScraper):
         await page.goto(search_url)
 
         # Wait for the events to load
-        await page.wait_for_selector('a[href*="/events/"]', timeout=10000)
+        await page.wait_for_selector('a[href*="/events/"]', timeout=10_000)
 
         # Scroll to load more events
         for _ in range(3):
@@ -252,7 +256,7 @@ class LumaScraper(BaseEventScraper):
         await page.goto(search_url)
 
         await page.wait_for_selector(
-            'a[class*="event-link content-link"]', timeout=10000
+            'a[class*="event-link content-link"]', timeout=10_000
         )
 
         for _ in range(3):
