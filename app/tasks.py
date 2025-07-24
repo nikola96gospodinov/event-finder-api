@@ -14,6 +14,7 @@ def run_agent_task(
     user_profile_dict: Dict[str, Any], only_highly_relevant: bool = False
 ):
     """Run agent task with proper serialization handling"""
+    logger.info("Starting run_agent_task")
     try:
         user_profile = UserProfile(**user_profile_dict)
 
@@ -22,6 +23,9 @@ def run_agent_task(
         try:
             result = loop.run_until_complete(agent(user_profile, only_highly_relevant))
             return result
+        except Exception as e:
+            logger.error(f"Error during agent execution: {str(e)}")
+            raise
         finally:
             loop.close()
     except Exception as e:

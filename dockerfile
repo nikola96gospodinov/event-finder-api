@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     procps \
     libxss1 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml .

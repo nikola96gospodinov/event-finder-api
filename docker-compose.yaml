@@ -18,6 +18,9 @@ services:
       - BROWSER_HEADLESS=${BROWSER_HEADLESS}
       - BROWSER_NAVIGATION_TIMEOUT=${BROWSER_NAVIGATION_TIMEOUT}
       - BROWSER_PAGE_TIMEOUT=${BROWSER_PAGE_TIMEOUT}
+      - PLAYWRIGHT_BROWSERS_PATH=/home/appuser/.cache/ms-playwright
+      - PYTHONPATH=/app
+      - CELERY_LOG_LEVEL=INFO
     volumes:
       - .:/app
     restart: unless-stopped
