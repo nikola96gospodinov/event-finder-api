@@ -22,11 +22,9 @@ logger = get_logger(__name__)
 async def agent(user_profile: UserProfile, only_highly_relevant: bool = False):
     logger.info("Starting agent execution")
     try:
-        logger.info("Getting search keywords")
         search_keywords = get_search_keywords_for_event_sites(user_profile, gemma_3_27b)
         logger.info(f"Found {len(search_keywords)} search keywords")
 
-        logger.info("Getting event links")
         event_links = await get_event_links(
             search_keywords=search_keywords,
             luma=True,
@@ -38,13 +36,10 @@ async def agent(user_profile: UserProfile, only_highly_relevant: bool = False):
         )
         logger.info(f"Found {len(event_links)} event links")
 
-        logger.info("Starting Playwright")
         playwright = await async_playwright().start()
-        logger.info("Launching browser")
         browser = await playwright.chromium.launch(
             headless=True, args=BrowserConfig.get_browser_args()
         )
-        logger.info("Browser launched successfully")
 
         events = []
         for event_link in event_links:
@@ -77,10 +72,6 @@ async def agent(user_profile: UserProfile, only_highly_relevant: bool = False):
             "Events specifically picked for you! 🤩",
             html,
         )
-
-        logger.info("Agent execution completed successfully")
-        return events
-
     except Exception as e:
         logger.error(f"Error in agent execution: {str(e)}")
         raise
