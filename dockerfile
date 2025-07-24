@@ -24,9 +24,10 @@ RUN mkdir -p /home/appuser/.cache && \
 
 COPY . .
 
-# Make startup script executable and set ownership
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chmod +x startup.sh && \
-    chown appuser:appuser startup.sh
+    chown appuser:appuser startup.sh && \
+    chown -R appuser:appuser /etc/supervisor/conf.d/
 
 USER appuser
 
