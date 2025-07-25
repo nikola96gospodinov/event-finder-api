@@ -31,8 +31,8 @@ class Settings(BaseSettings):
     # Browser Configuration
     BROWSER_POOL_SIZE: int = 1
     BROWSER_HEADLESS: bool = True
-    BROWSER_NAVIGATION_TIMEOUT: int = 30000
-    BROWSER_PAGE_TIMEOUT: int = 10000
+    BROWSER_NAVIGATION_TIMEOUT: int = 60000
+    BROWSER_PAGE_TIMEOUT: int = 30000
 
     class Config:
         case_sensitive = True
