@@ -25,6 +25,11 @@ async def agent(user_profile: UserProfile, only_highly_relevant: bool = False):
         search_keywords = get_search_keywords_for_event_sites(user_profile, gemma_3_27b)
         logger.info(f"Found {len(search_keywords)} search keywords")
 
+        playwright = await async_playwright().start()
+        browser = await playwright.chromium.launch(
+            headless=True, args=BrowserConfig.get_browser_args()
+        )
+
         event_links = await get_event_links(
             search_keywords=search_keywords,
             luma=True,
@@ -33,12 +38,7 @@ async def agent(user_profile: UserProfile, only_highly_relevant: bool = False):
             country=user_profile.location.country,
             country_code=user_profile.location.country_code,
             city=user_profile.location.city,
-        )
-        logger.info(f"Found {len(event_links)} event links")
-
-        playwright = await async_playwright().start()
-        browser = await playwright.chromium.launch(
-            headless=True, args=BrowserConfig.get_browser_args()
+            browser=browser,
         )
 
         events = []

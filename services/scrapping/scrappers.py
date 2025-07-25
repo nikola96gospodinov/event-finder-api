@@ -18,26 +18,36 @@ logger = get_logger(__name__)
 class BaseEventScraper:
     """Base class for event scrapers with common functionality."""
 
-    def __init__(self, base_url: str):
+    def __init__(self, base_url: str, browser: Optional[Browser] = None):
         self.base_url = base_url
-        self.playwright: Playwright
-        self.browser: Browser
-        self.context: BrowserContext
-        self.page: Page
+        self.browser = browser
+        self.playwright: Optional[Playwright] = None
+        self.context: Optional[BrowserContext] = None
+        self.page: Optional[Page] = None
+        self._owns_browser = browser is None
 
     async def setup(self):
         """Initialize playwright browser."""
-        self.playwright = await async_playwright().start()
-        self.browser = await self.playwright.chromium.launch(
-            headless=True, args=BrowserConfig.get_browser_args()
-        )
+        if self.browser is None:
+            self.playwright = await async_playwright().start()
+            self.browser = await self.playwright.chromium.launch(
+                headless=True, args=BrowserConfig.get_browser_args()
+            )
+            self._owns_browser = True
+
         self.context = await self.browser.new_context()
         self.page = await self.context.new_page()
 
     async def close(self):
         """Close browser and playwright."""
-        await self.browser.close()
-        await self.playwright.stop()
+        if self.context:
+            await self.context.close()
+
+        if self._owns_browser and self.browser:
+            await self.browser.close()
+
+        if self._owns_browser and self.playwright:
+            await self.playwright.stop()
 
     async def extract_event_urls(self, keyword: str, **kwargs):
         """
@@ -80,8 +90,8 @@ class BaseEventScraper:
 
 
 class EventBriteScraper(BaseEventScraper):
-    def __init__(self):
-        super().__init__(base_url="https://www.eventbrite.com")
+    def __init__(self, browser: Optional[Browser] = None):
+        super().__init__(base_url="https://www.eventbrite.com", browser=browser)
 
     async def extract_event_urls(
         self,
@@ -118,6 +128,7 @@ class EventBriteScraper(BaseEventScraper):
         )
         logger.info(f"Navigating to: {search_url}")
 
+        assert self.page is not None, "Page not initialized"
         await self.page.goto(search_url)
 
         await self.page.wait_for_selector(
@@ -189,8 +200,8 @@ class EventBriteScraper(BaseEventScraper):
 
 
 class MeetupScraper(BaseEventScraper):
-    def __init__(self):
-        super().__init__(base_url="https://www.meetup.com")
+    def __init__(self, browser: Optional[Browser] = None):
+        super().__init__(base_url="https://www.meetup.com", browser=browser)
 
     async def extract_event_urls(
         self,
@@ -223,6 +234,7 @@ class MeetupScraper(BaseEventScraper):
         )
 
         logger.info(f"Navigating to: {search_url}")
+        assert self.page is not None, "Page not initialized"
         await self.page.goto(search_url)
 
         # Wait for the events to load
@@ -257,8 +269,8 @@ class MeetupScraper(BaseEventScraper):
 
 
 class LumaScraper(BaseEventScraper):
-    def __init__(self):
-        super().__init__(base_url="https://lu.ma")
+    def __init__(self, browser: Optional[Browser] = None):
+        super().__init__(base_url="https://lu.ma", browser=browser)
 
     async def extract_event_urls(self, keyword: Optional[str] = None, **kwargs):
         """
@@ -280,6 +292,7 @@ class LumaScraper(BaseEventScraper):
         search_url = f"{self.base_url}/{location}".lower()
         logger.info(f"Navigating to: {search_url}")
 
+        assert self.page is not None, "Page not initialized"
         await self.page.goto(search_url)
 
         await self.page.wait_for_selector(
@@ -339,41 +352,63 @@ async def get_event_links(
     country="United Kingdom",
     city="London",
     country_code="gb",
+    browser: Optional[Browser] = None,
 ) -> list[str]:
-    tasks = []
+    """
+    Get event links from multiple sources sequentially.
 
-    if eventbrite:
-        eventbrite_scraper = EventBriteScraper()
-        tasks.append(
-            eventbrite_scraper.scrape_events_by_keywords(
-                keywords=search_keywords, country=country, city=city
-            )
-        )
+    Args:
+        search_keywords: List of keywords to search for
+        eventbrite: Whether to scrape Eventbrite
+        meetup: Whether to scrape Meetup
+        luma: Whether to scrape Luma
+        country: Country to search in
+        city: City to search in
+        country_code: Country code for Meetup
+        browser: Optional existing browser instance to reuse
 
-    if meetup:
-        meetup_scraper = MeetupScraper()
-        tasks.append(
-            meetup_scraper.scrape_events_by_keywords(
-                keywords=search_keywords, location=city, country_code=country_code
-            )
-        )
-
-    if luma:
-        luma_scraper = LumaScraper()
-        tasks.append(luma_scraper.scrape_events(location=city, max_events=40))
-
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-
+    Returns:
+        List of event URLs
+    """
     event_links = set()
 
-    for result in results:
-        if isinstance(result, Exception):
-            logger.error(f"Scraper error: {result}")
-            continue
+    if eventbrite:
+        try:
+            logger.info("Starting Eventbrite scraping...")
+            eventbrite_scraper = EventBriteScraper(browser=browser)
+            eventbrite_events = await eventbrite_scraper.scrape_events_by_keywords(
+                keywords=search_keywords, country=country, city=city
+            )
+            event_links.update(eventbrite_events)
+            logger.info(
+                f"Eventbrite scraping completed. Found {len(eventbrite_events)} events."
+            )
+        except Exception as e:
+            logger.error(f"Eventbrite scraper error: {e}")
 
-        if isinstance(result, list):
-            event_links.update(result)
-        else:
-            logger.error(f"Unexpected result type: {type(result)}")
+    if meetup:
+        try:
+            logger.info("Starting Meetup scraping...")
+            meetup_scraper = MeetupScraper(browser=browser)
+            meetup_events = await meetup_scraper.scrape_events_by_keywords(
+                keywords=search_keywords, location=city, country_code=country_code
+            )
+            event_links.update(meetup_events)
+            logger.info(
+                f"Meetup scraping completed. Found {len(meetup_events)} events."
+            )
+        except Exception as e:
+            logger.error(f"Meetup scraper error: {e}")
 
+    if luma:
+        try:
+            logger.info("Starting Luma scraping...")
+            luma_scraper = LumaScraper(browser=browser)
+            luma_events = await luma_scraper.scrape_events(location=city, max_events=40)
+            event_links.update(luma_events)
+            logger.info(f"Luma scraping completed. Found {len(luma_events)} events.")
+        except Exception as e:
+            logger.error(f"Luma scraper error: {e}")
+
+    logger.info(f"Total unique events found: {len(event_links)}")
     return list(event_links)
