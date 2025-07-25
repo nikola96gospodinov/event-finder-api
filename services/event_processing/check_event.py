@@ -23,7 +23,7 @@ async def check_event(
     event_link: str,
     user_profile: UserProfile,
     model: BaseChatModel,
-    browser: Optional[Browser],
+    browser: Optional[Browser] = None,
 ) -> EventResult | None:
     logger.info(f"Checking event: {event_link}")
 
