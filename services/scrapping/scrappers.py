@@ -38,7 +38,9 @@ class BaseEventScraper:
             )
             self._owns_browser = True
 
-        self.context = await self.browser.new_context()
+        self.context = await self.browser.new_context(
+            **BrowserConfig.get_context_options()
+        )
         await stealth.apply_stealth_async(self.context)
         self.page = await self.context.new_page()
 

@@ -28,12 +28,6 @@ class Settings(BaseSettings):
     UPSTASH_REDIS_REST_URL: str = ""
     UPSTASH_REDIS_REST_TOKEN: str = ""
 
-    # Browser Configuration
-    BROWSER_POOL_SIZE: int = 1
-    BROWSER_HEADLESS: bool = True
-    BROWSER_NAVIGATION_TIMEOUT: int = 60000
-    BROWSER_PAGE_TIMEOUT: int = 30000
-
     class Config:
         case_sensitive = True
         env_file = ".env"

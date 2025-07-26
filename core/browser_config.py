@@ -1,13 +1,6 @@
-from .config import settings
-
-
 class BrowserConfig:
     """Configuration for browser pool settings."""
 
-    MAX_BROWSERS: int = settings.BROWSER_POOL_SIZE
-    HEADLESS: bool = settings.BROWSER_HEADLESS
-    NAVIGATION_TIMEOUT: int = settings.BROWSER_NAVIGATION_TIMEOUT
-    PAGE_TIMEOUT: int = settings.BROWSER_PAGE_TIMEOUT
     BROWSER_ARGS: list[str] = [
         "--disable-blink-features=AutomationControlled",
         "--disable-extensions",
