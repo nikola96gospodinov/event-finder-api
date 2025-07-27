@@ -8,14 +8,11 @@ from playwright.async_api import (
     Playwright,
     async_playwright,
 )
-from playwright_stealth import Stealth  # type: ignore
 
 from core.browser_config import BrowserConfig
 from core.logging_config import get_logger
 
 logger = get_logger(__name__)
-
-stealth = Stealth()
 
 
 class BaseEventScraper:
@@ -41,7 +38,6 @@ class BaseEventScraper:
         self.context = await self.browser.new_context(
             **BrowserConfig.get_context_options()
         )
-        await stealth.apply_stealth_async(self.context)
         self.page = await self.context.new_page()
 
     async def close(self):
