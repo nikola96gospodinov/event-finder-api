@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     UPSTASH_REDIS_REST_URL: str = ""
     UPSTASH_REDIS_REST_TOKEN: str = ""
 
+    # Scrappey
+    SCRAPPEY_API_KEY: str = ""
+
     class Config:
         case_sensitive = True
         env_file = ".env"
