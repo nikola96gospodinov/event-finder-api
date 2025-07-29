@@ -17,6 +17,7 @@ dependencies = [
     "upstash-redis==1.4.0",
     "supabase==2.17.0",
     "mailgun==1.1.0",
+    "google-cloud-run==0.10.19",
 ]
 
 [project.optional-dependencies]

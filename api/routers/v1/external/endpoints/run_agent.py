@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from models.user_profile_model import UserProfile
 from services.auth.supabase_auth import get_current_user, get_current_user_profile
+from services.cloud_run_jobs import cloud_run_service
 from services.runs.user_runs_service import user_run_service
 
 from ..models.post_run_agent import ErrorResponse, PostRunAgentResponse
@@ -50,15 +51,17 @@ async def run_agent(
                 status_code=500, detail="Failed to record run. Please try again."
             )
 
-        # TODO: Submit to Cloud Run Jobs
-        # For now, just return a mock task ID
-        import uuid
+        try:
+            task_id = cloud_run_service.execute_job()
 
-        task_id = str(uuid.uuid4())
-
-        return PostRunAgentResponse(
-            task_id=task_id, status="Task submitted to Cloud Run Jobs (mock)"
-        )
+            return PostRunAgentResponse(
+                task_id=task_id, status="Task submitted to Cloud Run Jobs successfully"
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to submit job to Cloud Run Jobs: {str(e)}",
+            )
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

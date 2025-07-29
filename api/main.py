@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers.v1.v1_router import v1_router
-from core.cors_middleware import get_cors_middleware
+from core.cors_middleware import get_cors_middleware_config
 from core.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -13,7 +13,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-app.add_middleware(CORSMiddleware, **get_cors_middleware())
+app.add_middleware(CORSMiddleware, **get_cors_middleware_config())
 
 app.include_router(v1_router, prefix="/api/v1")
 

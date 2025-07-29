@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     # Scrappey
     SCRAPPEY_API_KEY: str = ""
 
+    # Google Cloud
+    GOOGLE_CLOUD_PROJECT: str = ""
+    GOOGLE_CLOUD_REGION: str = "europe-west2"
+    CLOUD_RUN_JOB_NAME: str = "event-finder-agent-job"
+
     class Config:
         case_sensitive = True
         env_file = ".env"
