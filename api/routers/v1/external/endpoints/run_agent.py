@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.tasks import run_agent_task
 from models.user_profile_model import UserProfile
 from services.auth.supabase_auth import get_current_user, get_current_user_profile
 from services.runs.user_runs_service import user_run_service
@@ -51,10 +50,15 @@ async def run_agent(
                 status_code=500, detail="Failed to record run. Please try again."
             )
 
-        # Convert UserProfile to dict for Celery serialization
-        user_profile_dict = user_profile.model_dump()
-        task = run_agent_task.delay(user_profile_dict, only_highly_relevant)
-        return PostRunAgentResponse(task_id=task.id, status="Task submitted")
+        # TODO: Submit to Cloud Run Jobs
+        # For now, just return a mock task ID
+        import uuid
+
+        task_id = str(uuid.uuid4())
+
+        return PostRunAgentResponse(
+            task_id=task_id, status="Task submitted to Cloud Run Jobs (mock)"
+        )
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

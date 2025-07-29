@@ -25,13 +25,10 @@ RUN mkdir -p /home/appuser/.cache && \
 
 COPY . .
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-RUN chmod +x startup.sh && \
-    chown appuser:appuser startup.sh && \
-    chown -R appuser:appuser /etc/supervisor/conf.d/
+RUN chown -R appuser:appuser /app
 
 USER appuser
 
 EXPOSE 8080
 
-CMD ["./startup.sh"]
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

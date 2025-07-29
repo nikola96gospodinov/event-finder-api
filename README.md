@@ -9,6 +9,7 @@ A FastAPI-based intelligent event discovery and analysis platform that helps use
 - **AI/LLM**: Google Gemma 3 27B, Ollama
 - **Web Scraping**: Playwright
 - **Caching**: Upstash Redis
+- **Background Jobs**: Google Cloud Run Jobs
 - **HTTP Client**: Requests
 
 ## Installation
@@ -17,6 +18,8 @@ A FastAPI-based intelligent event discovery and analysis platform that helps use
 
 - Python 3.11 or higher
 - pip or another Python package manager
+- Docker (for Cloud Run Jobs)
+- Google Cloud CLI (for deployment)
 
 ### Setup
 
@@ -55,6 +58,12 @@ Start the development server:
 uvicorn api.main:app --reload
 ```
 
+Or use the provided startup script:
+
+```bash
+./local-startup.sh
+```
+
 The API will be available at `http://localhost:8000`
 
 ### API Documentation
@@ -63,6 +72,37 @@ Once running, you can access:
 
 - **Interactive API docs**: http://localhost:8000/docs
 - **ReDoc documentation**: http://localhost:8000/redoc
+- **Health check**: http://localhost:8000/health
+
+## Cloud Run Jobs
+
+The application uses Google Cloud Run Jobs for background task processing instead of Celery.
+
+### Testing Jobs Locally
+
+```bash
+./test-job-local.sh
+```
+
+### Deploying Jobs
+
+1. Set your Google Cloud project ID:
+
+```bash
+export PROJECT_ID="your-project-id"
+```
+
+2. Deploy the job:
+
+```bash
+./deploy-job.sh
+```
+
+3. Execute the job:
+
+```bash
+gcloud run jobs execute event-finder-agent-job --region us-central1
+```
 
 ## Development
 
@@ -102,6 +142,10 @@ event-finder-api/
 ├── api/                    # FastAPI application
 │   ├── main.py            # Application entry point
 │   └── routers/           # API route definitions
+├── cloud_run_job.py       # Cloud Run Job script
+├── Dockerfile.job         # Dockerfile for Cloud Run Jobs
+├── deploy-job.sh          # Job deployment script
+├── test-job-local.sh      # Local job testing script
 ├── core/                  # Core configuration and utilities
 ├── models/                # Data models
 ├── services/              # Business logic services

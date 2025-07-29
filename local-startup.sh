@@ -1,33 +1,16 @@
 #!/bin/bash
 
-PORT=${PORT:-8080}
+echo "Stopping existing processes..."
+pkill -f "uvicorn" || true
 
-echo "Starting Event Finder API on port $PORT"
+sleep 2
 
-# Function to handle shutdown
-cleanup() {
-    echo "Shutting down services..."
-    if [ ! -z "$CELERY_PID" ]; then
-        kill $CELERY_PID 2>/dev/null
-    fi
-    if [ ! -z "$UVICORN_PID" ]; then
-        kill $UVICORN_PID 2>/dev/null
-    fi
-    exit 0
-}
-
-# Set up signal handlers
-trap cleanup SIGTERM SIGINT
-
-# Start Celery worker in the background
-echo "Starting Celery worker..."
-celery -A app.celery_app worker --loglevel=info --concurrency=1 &
-CELERY_PID=$!
-
-# Start FastAPI in the background
-echo "Starting FastAPI application..."
-uvicorn api.main:app --host 0.0.0.0 --port $PORT --workers 1 &
+echo "Starting FastAPI server..."
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8080 &
 UVICORN_PID=$!
 
-# Wait for both processes
-wait $CELERY_PID $UVICORN_PID
+echo "FastAPI server started with PID: $UVICORN_PID"
+echo "Server is running at http://localhost:8080"
+echo "Health check available at http://localhost:8080/health"
+
+wait $UVICORN_PID
