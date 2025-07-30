@@ -14,15 +14,18 @@ class CloudRunJobsService:
     """Service for managing Cloud Run Jobs execution."""
 
     def __init__(self):
-        self.jobs_client = run_v2.JobsClient()
-        self.executions_client = run_v2.ExecutionsClient()
+        self.jobs_client = run_v2.JobsAsyncClient()
+        self.executions_client = run_v2.ExecutionsAsyncClient()
         self.project_id = settings.GOOGLE_CLOUD_PROJECT
         self.region = settings.GOOGLE_CLOUD_REGION
         self.job_name = settings.CLOUD_RUN_JOB_NAME
 
-    def execute_job(self) -> str:
+    async def execute_job(self, parameters: Optional[dict] = None) -> str:
         """
         Execute the agent job on Cloud Run Jobs asynchronously.
+
+        Args:
+            parameters: Dictionary of parameters to pass to the job
 
         Returns:
             A unique task ID for tracking the job execution
@@ -35,7 +38,21 @@ class CloudRunJobsService:
         )
 
         try:
-            operation = self.jobs_client.run_job(name=job_path)
+            args = []
+            if parameters:
+                for key, value in parameters.items():
+                    args.extend([f"--{key}", str(value)])
+
+            request = run_v2.RunJobRequest(
+                name=job_path,
+                overrides=run_v2.RunJobRequest.Overrides(
+                    container_overrides=[
+                        run_v2.RunJobRequest.Overrides.ContainerOverride(args=args)
+                    ]
+                ),
+            )
+
+            operation = await self.jobs_client.run_job(request=request)
 
             if operation is None:
                 raise Exception("Failed to create job operation")
@@ -48,7 +65,7 @@ class CloudRunJobsService:
         except Exception as e:
             raise Exception(f"Failed to start Cloud Run Job: {str(e)}")
 
-    def get_execution_status(self, execution_name: str) -> Optional[str]:
+    async def get_execution_status(self, execution_name: str) -> Optional[str]:
         """
         Get the status of a job execution.
 
@@ -59,7 +76,7 @@ class CloudRunJobsService:
             The status of the execution, or None if not found
         """
         try:
-            execution = self.executions_client.get_execution(name=execution_name)
+            execution = await self.executions_client.get_execution(name=execution_name)
             return execution.conditions[0].type if execution.conditions else None
         except Exception:
             return None

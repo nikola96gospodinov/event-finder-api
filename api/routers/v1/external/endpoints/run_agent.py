@@ -4,6 +4,7 @@ from models.user_profile_model import UserProfile
 from services.auth.supabase_auth import get_current_user, get_current_user_profile
 from services.cloud_run_jobs import cloud_run_service
 from services.runs.user_runs_service import user_run_service
+from utils.user_profile_utils import serialize_user_profile
 
 from ..models.post_run_agent import ErrorResponse, PostRunAgentResponse
 
@@ -52,7 +53,12 @@ async def run_agent(
             )
 
         try:
-            task_id = cloud_run_service.execute_job()
+            parameters = {
+                "only_highly_relevant": str(only_highly_relevant),
+                "user_profile": serialize_user_profile(user_profile),
+            }
+
+            task_id = await cloud_run_service.execute_job(parameters=parameters)
 
             return PostRunAgentResponse(
                 task_id=task_id, status="Task submitted to Cloud Run Jobs successfully"

@@ -7,7 +7,7 @@ from supabase import Client
 from core.logging_config import get_logger
 from core.supabase_client import supabase_base
 from models.user_profile_model import UserProfile
-from utils.user_profile_utils import convert_to_user_profile
+from utils.user_profile_utils import convert_from_supabase_user_to_user_profile
 
 logger = get_logger(__name__)
 
@@ -99,7 +99,7 @@ async def get_current_user_profile(
     if not profile_data:
         return None
 
-    user_profile = convert_to_user_profile(profile_data, user)
+    user_profile = convert_from_supabase_user_to_user_profile(profile_data, user)
 
     if not user_profile:
         raise HTTPException(

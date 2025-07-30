@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from typing import Any, Dict, Optional
 
@@ -15,7 +16,7 @@ from utils.date_utils import time_to_string
 logger = get_logger(__name__)
 
 
-def convert_to_user_profile(
+def convert_from_supabase_user_to_user_profile(
     profile_data: Dict[str, Any], user_data: Optional[Dict[str, Any]] = None
 ) -> UserProfile | None:
     """Convert database profile data to UserProfile model"""
@@ -82,4 +83,32 @@ def convert_to_user_profile(
 
     except Exception as e:
         logger.error(f"Error converting profile data: {e}")
+        return None
+
+
+def serialize_user_profile(user_profile: UserProfile) -> str:
+    """Serialize user profile to JSON, handling datetime fields properly."""
+    profile_dict = user_profile.model_dump()
+
+    if "birth_date" in profile_dict and isinstance(
+        profile_dict["birth_date"], datetime
+    ):
+        profile_dict["birth_date"] = profile_dict["birth_date"].isoformat()
+
+    return json.dumps(profile_dict)
+
+
+def convert_from_json_to_user_profile(
+    json_data: str,
+) -> UserProfile | None:
+    """Convert JSON data to UserProfile model"""
+    try:
+        profile_dict = json.loads(json_data)
+        if "birth_date" in profile_dict and isinstance(profile_dict["birth_date"], str):
+            profile_dict["birth_date"] = datetime.fromisoformat(
+                profile_dict["birth_date"]
+            )
+        return UserProfile(**profile_dict)
+    except Exception as e:
+        logger.error(f"Error converting JSON to user profile: {e}")
         return None
