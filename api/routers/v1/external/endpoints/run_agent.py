@@ -72,8 +72,6 @@ async def run_agent(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except HTTPException as e:
-        raise HTTPException(status_code=401, detail=f"Unauthorized: {str(e)}")
-    except HTTPException as e:
-        raise HTTPException(status_code=429, detail=f"Too Many Requests: {str(e)}")
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to run agent: {str(e)}")
