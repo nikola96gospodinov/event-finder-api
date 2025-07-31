@@ -38,6 +38,7 @@ venv.bak/
 .idea/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
@@ -48,6 +49,23 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
 # Documentation
 README.md
 *.md
+
+# Test files
+test-job-local.sh
+test-job-local.sh.bak
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp

@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
 """
-Simple Test Job for Google Cloud Run Jobs.
-This job is for testing purposes only and doesn't perform any actual work.
+Agent Job for Google Cloud Run Jobs.
+This job executes the event finding agent directly.
 """
 
 import argparse
+import asyncio
+import json
 import os
 import sys
 from datetime import datetime
 
-# from utils.user_profile_utils import convert_from_json_to_user_profile
+# Import the agent function directly
+from core.logging_config import setup_logging
+from services.agent.agent import agent
+from utils.user_profile_utils import convert_from_json_to_user_profile
+
+# Set up logging configuration
+setup_logging(log_level="INFO")
 
 print("=" * 50)
-print("SIMPLE TEST JOB STARTED")
+print("AGENT JOB STARTED")
 print("=" * 50)
 
 print(f"Timestamp: {datetime.utcnow().isoformat()}")
@@ -41,18 +49,44 @@ user_profile_json = args.user_profile or "Not provided"
 print(f"only_highly_relevant: {only_highly_relevant}")
 print(f"user_profile: {user_profile_json}")
 
-# if user_profile_json != "Not provided":
-#     try:
-#         user_profile = convert_from_json_to_user_profile(user_profile_json)
-#         print(f"Parsed user_profile: {user_profile}")
-#     except json.JSONDecodeError:
-#         print("\nCould not parse user_profile as JSON")
+if user_profile_json == "Not provided":
+    print("ERROR: user_profile parameter is required")
+    sys.exit(1)
 
-print("\nThis is a simple test job that does nothing but print information.")
-print("It's used for testing Cloud Run Jobs functionality.")
+try:
+    user_profile = convert_from_json_to_user_profile(user_profile_json)
+    if user_profile is None:
+        print("ERROR: Could not convert user_profile - returned None")
+        sys.exit(1)
+    print(f"Parsed user_profile: {user_profile}")
+except json.JSONDecodeError as e:
+    print(f"ERROR: Could not parse user_profile as JSON: {e}")
+    sys.exit(1)
+except Exception as e:
+    print(f"ERROR: Could not convert user_profile: {e}")
+    sys.exit(1)
+
+# Convert only_highly_relevant to boolean
+only_highly_relevant_bool = False
+if only_highly_relevant.lower() in ["true", "1", "yes", "on"]:
+    only_highly_relevant_bool = True
+
+print(f"only_highly_relevant (boolean): {only_highly_relevant_bool}")
+
+print("\n" + "=" * 30)
+print("EXECUTING AGENT")
+print("=" * 30)
+
+try:
+    # Run the agent function directly
+    asyncio.run(agent(user_profile, only_highly_relevant_bool))
+    print("Agent execution completed successfully")
+except Exception as e:
+    print(f"ERROR: Agent execution failed: {e}")
+    sys.exit(1)
 
 print("\n" + "=" * 50)
-print("SIMPLE TEST JOB COMPLETED SUCCESSFULLY")
+print("AGENT JOB COMPLETED SUCCESSFULLY")
 print("=" * 50)
 
 sys.exit(0)

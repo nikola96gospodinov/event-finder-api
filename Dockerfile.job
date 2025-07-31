@@ -2,11 +2,33 @@ FROM --platform=linux/amd64 python:3.11-slim
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    ca-certificates \
+    procps \
+    libxss1 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY pyproject.toml uv.lock ./
+
 RUN pip install --no-cache-dir -e .
 
-COPY jobs/ ./jobs/
+RUN useradd -m -u 1000 appuser
+
+RUN playwright install chromium --with-deps
+
+RUN mkdir -p /home/appuser/.cache && \
+    cp -r /root/.cache/ms-playwright /home/appuser/.cache/ && \
+    chown -R appuser:appuser /home/appuser/.cache/ms-playwright
+
+COPY . .
+
+RUN chown -R appuser:appuser /app
+
+USER appuser
 
 RUN chmod +x jobs/agent_job.py
 
-ENTRYPOINT ["python", "jobs/agent_job.py"]
+ENTRYPOINT ["python", "-m", "jobs.agent_job"]
