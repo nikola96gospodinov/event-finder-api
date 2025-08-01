@@ -99,13 +99,63 @@ class EventBriteScraper(BaseEventScraper):
     def __init__(self, browser: Optional[Browser] = None):
         super().__init__(base_url="https://www.eventbrite.com", browser=browser)
 
+    async def scrape_events_by_keywords(self, keywords: List[str], **kwargs):
+        """
+        Scrape event URLs for multiple keywords with parallel processing
+        when using Scrappey.
+
+        Args:
+            keywords: List of keywords to search for
+            **kwargs: Additional keyword arguments for extract_event_urls
+
+        Returns:
+            List of event URLs
+        """
+        # Use parallel processing only in production (when using Scrappey)
+        if settings.ENVIRONMENT == "production":
+            return await self._scrape_events_parallel(keywords, **kwargs)
+        else:
+            return await super().scrape_events_by_keywords(keywords, **kwargs)
+
+    async def _scrape_events_parallel(self, keywords: List[str], **kwargs):
+        """
+        Scrape events in parallel using Scrappey with limited concurrency.
+        """
+        semaphore = asyncio.Semaphore(5)
+
+        async def scrape_single_keyword(keyword: str):
+            async with semaphore:
+                events = await self.extract_event_urls(keyword=keyword, **kwargs)
+                return events
+
+        tasks = [scrape_single_keyword(keyword) for keyword in keywords]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        all_events = []
+
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"Error scraping keyword '{keywords[i]}': {result}")
+                continue
+
+            if isinstance(result, list):
+                all_events.extend(result)
+            else:
+                logger.error(
+                    f"Unexpected result type for keyword '{keywords[i]}': "
+                    f"{type(result)}"
+                )
+
+        unique_events = list(dict.fromkeys(all_events))
+        return unique_events
+
     async def extract_event_urls(
         self,
         keyword="tech",
         country="United Kingdom",
         city="London",
-        promoted_count=2,
-        regular_count=3,
+        promoted_count=0,
+        regular_count=5,
         **kwargs,
     ):
         """
