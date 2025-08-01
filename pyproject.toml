@@ -13,6 +13,7 @@ dependencies = [
     "langchain-google-genai==2.1.8",
     "langchain-ollama==0.3.4",
     "requests==2.32.4",
+    "httpx==0.28.1",
     "playwright==1.53.0",
     "upstash-redis==1.4.0",
     "supabase==2.17.0",

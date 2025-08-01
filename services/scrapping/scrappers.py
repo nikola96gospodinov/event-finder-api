@@ -12,6 +12,7 @@ from playwright.async_api import (
 )
 
 from core.browser_config import BrowserConfig
+from core.config import settings
 from core.logging_config import get_logger
 from core.scrappey import get_html_from_scrappey
 
@@ -133,14 +134,13 @@ class EventBriteScraper(BaseEventScraper):
         )
 
         # Use Scrappey to get the HTML content in production
-        # TODO: Change to settings.ENVIRONMENT == "production" once everything is tested
-        if True:
+        if settings.ENVIRONMENT == "production":
             logger.info(f"Using Scrappey to get event links for: {search_url}")
             event_links = await self.extract_event_urls_from_scrappey(search_url)
             total_count = promoted_count + regular_count
             return event_links[:total_count]
 
-        logger.info(f"Navigating to: {search_url}")  # type: ignore
+        logger.info(f"Navigating to: {search_url}")
 
         assert self.page is not None, "Page not initialized"
         await self.page.goto(search_url)
@@ -216,7 +216,11 @@ class EventBriteScraper(BaseEventScraper):
         """
         Extract URLs of events from Eventbrite using Scrappey.
         """
-        html_content = get_html_from_scrappey(url)
+        try:
+            html_content = await get_html_from_scrappey(url)
+        except Exception as e:
+            logger.error(f"Error getting HTML from Scrappey for {url}: {e}")
+            return []
 
         script_pattern = (
             r'<script type="application/ld\+json">\s*'
@@ -228,6 +232,10 @@ class EventBriteScraper(BaseEventScraper):
             script_pattern, html_content, re.DOTALL | re.IGNORECASE
         )
 
+        if not script_matches:
+            logger.error(f"No script matches found for URL: {url}")
+            return []
+
         all_links = []
 
         for script_match in script_matches:
@@ -237,16 +245,19 @@ class EventBriteScraper(BaseEventScraper):
                 if "itemListElement" in json_data and isinstance(
                     json_data["itemListElement"], list
                 ):
-
-                    # Extract events from itemListElement
                     for item in json_data["itemListElement"]:
                         if "item" in item and isinstance(item["item"], dict):
                             event = item["item"]
 
-                            # Only include events that have a URL
                             if "url" in event and event["url"]:
                                 if event["url"] and event["url"] not in all_links:
                                     all_links.append(event["url"])
+                            else:
+                                logger.error(f"No url found in event: {event}")
+                        else:
+                            logger.error(f"No item found in event: {event}")
+                else:
+                    logger.error(f"No itemListElement found in HTML: {html_content}")
 
             except json.JSONDecodeError as e:
                 print(f"Error parsing JSON-LD script: {e}")

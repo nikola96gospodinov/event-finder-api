@@ -1,9 +1,9 @@
-import requests
+import httpx
 
 from core.config import settings
 
 
-def get_html_from_scrappey(url: str) -> str:
+async def get_html_from_scrappey(url: str) -> str:
     headers = {
         "Content-Type": "application/json",
     }
@@ -14,11 +14,31 @@ def get_html_from_scrappey(url: str) -> str:
 
     json_data = {"cmd": "request.get", "url": url}
 
-    response = requests.post(
-        "https://publisher.scrappey.com/api/v1",
-        params=params,
-        headers=headers,
-        json=json_data,
-    ).json()
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            response = await client.post(
+                "https://publisher.scrappey.com/api/v1",
+                params=params,
+                headers=headers,
+                json=json_data,
+            )
+            response.raise_for_status()
+            response_data = response.json()
+        except httpx.HTTPStatusError as e:
+            raise ValueError(
+                f"Scrappey API error (HTTP {e.response.status_code}): {e.response.text}"
+            )
+        except httpx.RequestError as e:
+            raise ValueError(f"Scrappey request failed: {e}")
+        except Exception as e:
+            raise ValueError(f"Unexpected error with Scrappey: {e}")
 
-    return str(response["solution"]["response"])
+    if "solution" not in response_data:
+        raise ValueError(f"Unexpected Scrappey response structure: {response_data}")
+
+    if "response" not in response_data["solution"]:
+        raise ValueError(
+            f"No 'response' field in Scrappey solution: {response_data['solution']}"
+        )
+
+    return str(response_data["solution"]["response"])
