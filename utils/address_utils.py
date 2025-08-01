@@ -2,7 +2,7 @@ import math
 import re
 from urllib.parse import quote
 
-import requests
+import httpx
 
 from core.logging_config import get_logger
 from models.coordinates_model import Coordinates
@@ -31,7 +31,7 @@ def get_location_from_postcode(postcode: str | None) -> Location | None:
         "User-Agent": "EventDisqualifierApp/1.0",
     }
     try:
-        result = requests.get(url=url, headers=headers)
+        result = httpx.get(url=url, headers=headers)
         if result.text.strip():
             result_json = result.json()
             if result_json and len(result_json) > 0:
