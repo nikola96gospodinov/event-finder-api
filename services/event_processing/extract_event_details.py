@@ -51,7 +51,7 @@ def extract_event_details(
         - Date of the event - this should be in the following format: "DD-MM-YYYY". If the year of the event is not mentioned, then assume it's the current year - {current_year}. If there are multiple dates, then return the most relevant but never multiple dates. For example "14-01-2025 to 14-06-2025" should be "14-01-2025"
         - Start time of the event - this should be in the following format: "10:00", "22:00". Note that the time could be represented in many different ways on the page. 6, 6:00pm, 18:00 etc. but we need to extract the time in 24 hour format.
         - End time of the event - this should be in the following format: "10:00", "22:00". Note that the time could be represented in many different ways on the page. 6, 6:00pm, 18:00 etc. but we need to extract the time in 24 hour format.
-        - Location of the event - be as specific as possible. For example, "123 Main St, EC1A 1BB, London, UK" is more specific than "London, UK". If the street is not mentioned, then the postcode is the most important thing. If it says TBC, then return None for the location.
+        - Location of the event - be as specific as possible. For example, "123 Main St, EC1A 1BB, London, UK" is more specific than "London, UK". If the street is not mentioned, then the postcode is the most important thing. If it says TBC, then return None for the location. IMPORTANT: The location must be returned as a dictionary with a "full_address" field, not as a plain string.
         - Price of the event - just put the number like 20, 50, 100, etc. in either float or int format without the currency symbol. If an event is free, then the price should be 0 instead of None
         - Event format returns a list of of options. The options are: {event_format_options} - This tells us whether the event is online, in person or both. Mentions of Zoom, Online, Virtual, etc. should be considered online unless it's a combination of in person and online, in which case it should be ["offline", "online"].
         - Whether the event is sold out or out of spaces. Note that "Sales ending soon", "Sales end soon", "Limited spaces left", "Limited availability", "Limited availability left", or similar phrases are not a sign of a sold out event and details should be extracted.
@@ -74,8 +74,10 @@ def extract_event_details(
             "event_format": ["offline"],
             "is_sold_out": False
         }}
+
+        CRITICAL: The location_of_event field MUST be a dictionary with a "full_address" key, never a plain string.
         Don't do any formatting. Just return the Python dictionary as plain text. Under any circumstances, don't use ```python or ``` in the response.
-        Under any circumstances, don't return JSON and make sure the response is a valid Python dictionary. This is crucial.
+        Under any circumstances, don't return JSON and make sure the response is a valid Python dictionary. This is crucial. If the location is not mentioned, then return None for the location.
 
         If there is no information about a particular detail, return None for that detail.
     """
@@ -109,17 +111,26 @@ def extract_event_details(
     if dict_match:
         event_details = dict_match.group(0)
 
-    # Handle case where model returns None
     if event_details.lower() == "none":
         return None
 
     try:
         event_details_dict = ast.literal_eval(event_details)
+
+        if isinstance(event_details_dict.get("location_of_event"), str):
+            location_string = event_details_dict["location_of_event"]
+            event_details_dict["location_of_event"] = {"full_address": location_string}
+
         event_details_result: EventDetails | None = EventDetails(**event_details_dict)
     except (SyntaxError, ValueError) as e:
         logger.error(f"Error parsing event details: {e}")
         logger.error(f"Original event details: {og_event_details}")
         logger.error(f"Raw event details: {event_details}")
+        return None
+    except Exception as e:
+        logger.error(f"Error creating EventDetails object: {e}")
+        logger.error(f"Processed event details dict: {event_details_dict}")
+        logger.error(f"Original event details: {og_event_details}")
         return None
 
     if (
