@@ -264,35 +264,35 @@ class EventRelevanceCalculator:
                 and event_details.age_range.min_age == 18
                 and not event_details.age_range.max_age
             ):
-                score += 1
+                score += 2
             else:
-                score += 4
+                score += 5
 
         if event_details.gender_bias and self.user_profile.gender:
             if len(event_details.gender_bias) == 1:
-                score += 3
+                score += 4
             else:
-                score += 1
+                score += 2
 
         if (
             event_details.relationship_status_bias
             and self.user_profile.relationship_status
         ):
             if len(event_details.relationship_status_bias) == 1:
-                score += 3
+                score += 4
             else:
-                score += 1
+                score += 2
 
         if (
             event_details.sexual_orientation_bias
             and self.user_profile.sexual_orientation
         ):
             if len(event_details.sexual_orientation_bias) == 1:
-                score += 3
+                score += 4
             else:
-                score += 1
+                score += 2
 
-        return min(score, 10)
+        return min(score, 15)
 
     def calculate_event_relevance_score(
         self, webpage_content: str | None, event_details: EventDetails
@@ -310,4 +310,4 @@ class EventRelevanceCalculator:
         demographic_score = self._calculate_demographic_score(event_details)
 
         total_score = relevance_score + price_score + distance_score + demographic_score
-        return round(total_score, 1)
+        return min(round(total_score, 1), 100)
