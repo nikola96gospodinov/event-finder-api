@@ -183,13 +183,13 @@ class EventRelevanceCalculator:
             try:
                 scoring_system: ScoringSystem = ast.literal_eval(text_to_parse)
                 interests_score = min(
-                    scoring_system["interests"]["exact_match"] * 20
+                    scoring_system["interests"]["exact_match"] * 25
                     + scoring_system["interests"]["partial_match"] * 10
                     + scoring_system["interests"]["weak_match"] * 2,
                     50,
                 )
                 goals_score = min(
-                    scoring_system["goals"]["exact_match"] * 20
+                    scoring_system["goals"]["exact_match"] * 25
                     + scoring_system["goals"]["partial_match"] * 10
                     + scoring_system["goals"]["weak_match"] * 2,
                     30,
