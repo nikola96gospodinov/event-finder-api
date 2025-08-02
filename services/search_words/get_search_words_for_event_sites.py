@@ -44,6 +44,35 @@ def get_search_keywords_for_event_sites(
         List of search keywords
     """
 
+    lgbtq_section = (
+        """
+        4. LGBTQ+ QUERY:
+        - Create one LGBTQ+ query (e.g. "LGBTQ+ events", "LGBTQ+ community", "LGBTQ+ support group", etc.)
+    """
+        if user_profile.sexual_orientation != "straight"
+        else ""
+    )
+
+    single_non_lgbtq_section = (
+        """
+        5. SINGLE-SPECIFIC QUERY:
+        - Create one single-specific query. Include the age bracket if relevant (e.g. "single events", "speed dating {age_bracket}", etc.)
+    """
+        if user_profile.relationship_status == "single"
+        and user_profile.sexual_orientation == "straight"
+        else ""
+    )
+
+    single_lgbtq_section = (
+        """
+        6. SINGLE-SPECIFIC QUERY:
+        - Create one single-specific query (e.g. "LGBTQ+ speed dating", "LGBTQ+ singles", etc.)
+    """
+        if user_profile.relationship_status == "single"
+        and user_profile.sexual_orientation != "straight"
+        else ""
+    )
+
     prompt_template = """
         You are a search query generator specialized in creating effective event discovery queries.
 
@@ -56,8 +85,6 @@ def get_search_keywords_for_event_sites(
         - User's interests: {interests}
         - User's occupation: {occupation}
         - User's gender: {gender}
-        - Is LGBTQ+: {is_lgbtq}
-        - Is single: {is_single}
 
         QUERY CREATION RULES:
         1. GOAL-BASED QUERIES:
@@ -70,14 +97,11 @@ def get_search_keywords_for_event_sites(
         3. GENDER-SPECIFIC QUERIES:
         - Create one gender-specific query based on the user's gender (e.g. ladies only, men circles, etc.)
 
-        4. LGBTQ+ QUERY (OPTIONAL):
-        - Create one LGBTQ+ query if the user is LGBTQ+ - this is optional and should only be done if the user is LGBTQ+. (e.g. "LGBTQ+ events", "LGBTQ+ community", "LGBTQ+ support group", etc.)
+        {lgbtq_section}
 
-        5. SINGLE-SPECIFIC QUERY FOR NON-LGBTQ+ USERS (OPTIONAL):
-        - Create one single-specific query if the user is single and not LGBTQ+ - this is optional and should only be done if the user is single and not LGBTQ+. Include the age bracket if relevant (e.g. "single events", "speed dating {age_bracket}", etc.)
-
-        6. SINGLE-SPECIFIC QUERY FOR LGBTQ+ USERS (OPTIONAL):
-        - Create one single-specific query if the user is single and LGBTQ+ - this is optional and should only be done if the user is single and LGBTQ+. (e.g. "LGBTQ+ speed dating", "LGBTQ+ singles", etc.)
+        {single_non_lgbtq_section}
+            
+        {single_lgbtq_section}
 
         7. INTEREST-BASED QUERIES:
         - Keep all interest queries to 4 words or less
@@ -113,8 +137,9 @@ def get_search_keywords_for_event_sites(
             ),
             "occupation": user_profile.occupation,
             "gender": user_profile.gender,
-            "is_lgbtq": user_profile.sexual_orientation != "straight",
-            "is_single": user_profile.relationship_status == "single",
+            "lgbtq_section": lgbtq_section,
+            "single_non_lgbtq_section": single_non_lgbtq_section,
+            "single_lgbtq_section": single_lgbtq_section,
         },
     )
 
