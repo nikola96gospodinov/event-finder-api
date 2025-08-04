@@ -78,6 +78,7 @@ def get_cors_middleware_config() -> dict:
     if is_production:
         allowed_origins = [
             "https://event-finder-ui.vercel.app",
+            "https://www.allivents.com",
         ]
         logger.info(f"Production mode: CORS restricted to {allowed_origins}")
     else:
