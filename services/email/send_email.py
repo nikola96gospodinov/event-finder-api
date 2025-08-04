@@ -9,8 +9,13 @@ domain = settings.MAILGUN_DOMAIN
 client: Client = Client(auth=("api", key))
 
 
-def post_message(email_to: str, email_from: str, subject: str, html: str) -> None:
-    data = {"from": email_from, "to": email_to, "subject": subject, "html": html}
+def post_message(email_to: str, subject: str, html: str) -> None:
+    data = {
+        "from": "Allivents <postmaster@mail.allivents.com>",
+        "to": email_to,
+        "subject": subject,
+        "html": html,
+    }
 
     req = client.messages.create(data=data, domain=domain)
     logger.info(req.json())

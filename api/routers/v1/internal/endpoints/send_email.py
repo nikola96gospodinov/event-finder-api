@@ -23,7 +23,6 @@ async def send_email(events: list[EventResult], user_profile: UserProfile):
         html = format_events_for_email(events, user_profile)
         post_message(
             user_profile.email,
-            "test@test.com",
             "Events specifically picked for you! 🤩",
             html,
         )

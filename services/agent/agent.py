@@ -68,7 +68,6 @@ async def agent(user_profile: UserProfile, only_highly_relevant: bool = False):
         html = format_events_for_email(events, user_profile)
         post_message(
             user_profile.email,
-            "test@test.com",
             "Events specifically picked for you! 🤩",
             html,
         )
