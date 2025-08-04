@@ -73,6 +73,9 @@ def format_events_for_email(
                 time_info += f" - {end_time}"
 
         location_of_event = event.event_details.location_of_event
+        distance = None
+        unit = None
+
         if (
             user_profile.location
             and location_of_event
