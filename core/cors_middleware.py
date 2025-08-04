@@ -107,6 +107,7 @@ def get_origin_restriction_middleware_config() -> Optional[dict]:
     if is_production:
         allowed_origins = [
             "https://event-finder-ui.vercel.app",
+            "https://www.allivents.com/",
         ]
         logger.info(
             f"Production mode: Origin restriction enabled for {allowed_origins}"
