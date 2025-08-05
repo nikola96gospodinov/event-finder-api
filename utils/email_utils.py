@@ -112,6 +112,7 @@ def format_events_for_email(
                                                             {f'<p style="color: #64748b; margin: 0 0 8px 0; font-size: 0.95rem;">📅 {date_info}</p>' if date_info else ''}
                                                             {f'<p style="color: #64748b; margin: 0 0 8px 0; font-size: 0.95rem;">🕒 {time_info}</p>' if time_info else ''}
                                                             {f'<p style="color: #64748b; margin: 0 0 8px 0; font-size: 0.95rem;">📍 {distance:.1f} {unit} away</p>' if distance else ''}
+                                                            {f'<p style="color: #64748b; margin: 0 0 8px 0; font-size: 0.95rem;">🌐 Online event</p>' if event.event_details.event_format == "online" else ''}
                                                             <span style="display: inline-block; color: #7c3aed; font-size: 0.9rem; font-weight: 500; text-decoration: underline; margin-top: 12px;">Check it out →</span>
                                                         </a>
                                                     </td>
