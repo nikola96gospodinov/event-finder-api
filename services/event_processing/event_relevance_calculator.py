@@ -184,14 +184,14 @@ class EventRelevanceCalculator:
                 scoring_system: ScoringSystem = ast.literal_eval(text_to_parse)
                 interests_score = min(
                     scoring_system["interests"]["exact_match"] * 25
-                    + scoring_system["interests"]["partial_match"] * 10
-                    + scoring_system["interests"]["weak_match"] * 2,
+                    + scoring_system["interests"]["partial_match"] * 12
+                    + scoring_system["interests"]["weak_match"] * 3,
                     50,
                 )
                 goals_score = min(
                     scoring_system["goals"]["exact_match"] * 25
-                    + scoring_system["goals"]["partial_match"] * 10
-                    + scoring_system["goals"]["weak_match"] * 2,
+                    + scoring_system["goals"]["partial_match"] * 12
+                    + scoring_system["goals"]["weak_match"] * 3,
                     30,
                 )
                 industry_mismatch_score = self._industry_mismatch_deduction(
@@ -270,7 +270,9 @@ class EventRelevanceCalculator:
 
         if event_details.gender_bias and self.user_profile.gender:
             if len(event_details.gender_bias) == 1:
-                score += 4
+                score += 5
+            elif self.user_profile.gender in event_details.gender_bias:
+                score += 3
             else:
                 score += 2
 
@@ -279,7 +281,12 @@ class EventRelevanceCalculator:
             and self.user_profile.relationship_status
         ):
             if len(event_details.relationship_status_bias) == 1:
-                score += 4
+                score += 5
+            elif (
+                self.user_profile.relationship_status
+                in event_details.relationship_status_bias
+            ):
+                score += 3
             else:
                 score += 2
 
@@ -288,7 +295,12 @@ class EventRelevanceCalculator:
             and self.user_profile.sexual_orientation
         ):
             if len(event_details.sexual_orientation_bias) == 1:
-                score += 4
+                score += 5
+            elif (
+                self.user_profile.sexual_orientation
+                in event_details.sexual_orientation_bias
+            ):
+                score += 3
             else:
                 score += 2
 
