@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
-from schemas.user_profile_model import UserProfile
+from schemas.user_profile_model import AcceptableTimes, UserProfile
 from services.auth.supabase_auth import get_current_user, get_current_user_profile
 from services.cloud_run_jobs import cloud_run_service
 from services.runs.user_runs_service import user_run_service
@@ -24,6 +24,17 @@ router = APIRouter()
 async def run_agent(
     only_highly_relevant: bool = Query(
         False, description="Event only highly relevant to the user or not"
+    ),
+    custom_location: str | None = Body(
+        default=None, description="Custom location to use for the agent"
+    ),
+    custom_dates: list[str] | None = Body(
+        default=None,
+        description="Custom set of acceptable dates",
+    ),
+    custom_times: AcceptableTimes | None = Body(
+        default=None,
+        description="Custom set of acceptable times",
     ),
     user: dict = Depends(get_current_user),
     user_profile: UserProfile = Depends(get_current_user_profile),

@@ -26,8 +26,16 @@ class Location(Coordinates):
 
 
 class StartEndTime(BaseModel):
-    start: Optional[str] = Field(None, description="Start time in HH:MM format")
-    end: Optional[str] = Field(None, description="End time in HH:MM format")
+    start: Optional[str] = Field(
+        None,
+        description="Start time in HH:MM format",
+        pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$",
+    )
+    end: Optional[str] = Field(
+        None,
+        description="End time in HH:MM format",
+        pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$",
+    )
 
 
 class AcceptableTimes(BaseModel):
