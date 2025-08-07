@@ -45,8 +45,6 @@ async def run_agent(
                 ),
             )
 
-        # TODO: The run should be recorded after it's been successful
-        # but for now we'll record it before the agent runs
         run_recorded = await user_run_service.record_user_run(user_id)
         if not run_recorded:
             raise HTTPException(

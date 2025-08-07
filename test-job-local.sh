@@ -76,6 +76,7 @@ docker run --rm \
     -e CLOUD_RUN_JOB_NAME="$CLOUD_RUN_JOB_NAME" \
     event-finder-job-test \
     --user_profile "$TEST_USER_PROFILE" \
-    --only_highly_relevant false
+    --only_highly_relevant false \
+    --user_id "123"
 
 echo "Local test completed!"
