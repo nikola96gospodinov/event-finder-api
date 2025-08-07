@@ -6,7 +6,7 @@ from supabase import Client
 
 from core.logging_config import get_logger
 from core.supabase_client import supabase_base
-from models.user_profile_model import UserProfile
+from schemas.user_profile_model import UserProfile
 from utils.user_profile_utils import convert_from_supabase_user_to_user_profile
 
 logger = get_logger(__name__)

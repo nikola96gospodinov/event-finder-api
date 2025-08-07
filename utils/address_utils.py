@@ -5,8 +5,8 @@ from urllib.parse import quote
 import httpx
 
 from core.logging_config import get_logger
-from models.coordinates_model import Coordinates
-from models.user_profile_model import DistanceUnit, Location
+from schemas.coordinates_model import Coordinates
+from schemas.user_profile_model import DistanceUnit, Location
 
 logger = get_logger(__name__)
 

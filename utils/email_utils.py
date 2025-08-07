@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from models.event_model import EventResult
-from models.user_profile_model import Coordinates, UserProfile
+from schemas.event_model import EventResult
+from schemas.user_profile_model import Coordinates, UserProfile
 from utils.address_utils import calculate_distance
 
 

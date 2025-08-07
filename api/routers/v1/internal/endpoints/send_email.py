@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException
 
-from models.event_model import EventResult
-from models.user_profile_model import UserProfile
+from schemas.event_model import EventResult
+from schemas.user_profile_model import UserProfile
 from services.email.send_email import post_message
 from utils.email_utils import format_events_for_email
 
-from ..models.send_email import ErrorResponse, SendEmailResponse
+from ..schemas.send_email import ErrorResponse, SendEmailResponse
 
 router = APIRouter()
 

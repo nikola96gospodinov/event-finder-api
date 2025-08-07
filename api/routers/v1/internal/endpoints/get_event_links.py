@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from services.scrapping.scrappers import get_event_links as get_event_links_service
 
-from ..models.get_event_links import ErrorResponse, EventLinksResponse
+from ..schemas.get_event_links import ErrorResponse, EventLinksResponse
 
 router = APIRouter()
 

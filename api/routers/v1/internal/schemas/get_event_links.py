@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from api.routers.v1.models.common import ErrorResponse
+from api.routers.v1.schemas.common import ErrorResponse
 
 
 class EventLinksResponse(BaseModel):

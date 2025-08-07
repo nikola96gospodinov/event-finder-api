@@ -3,7 +3,7 @@ from typing import List
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 
-from models.user_profile_model import UserProfile
+from schemas.user_profile_model import UserProfile
 from utils.age_utils import get_age_bracket, get_age_from_birth_date
 from utils.request_utils import retry_with_backoff
 

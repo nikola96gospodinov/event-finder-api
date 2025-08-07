@@ -2,13 +2,13 @@ from typing import Literal, Optional, Union
 
 from pydantic import BaseModel
 
-from models.bias_options import (
+from schemas.bias_options import (
     event_format_options,
     gender_bias_options,
     relationship_status_bias_options,
     sexual_orientation_bias_options,
 )
-from models.coordinates_model import Coordinates
+from schemas.coordinates_model import Coordinates
 
 
 class LocationOfEvent(Coordinates):

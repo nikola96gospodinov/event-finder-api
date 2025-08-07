@@ -3,12 +3,12 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from models.bias_options import (
+from schemas.bias_options import (
     gender_bias_options,
     relationship_status_bias_options,
     sexual_orientation_bias_options,
 )
-from models.coordinates_model import Coordinates
+from schemas.coordinates_model import Coordinates
 
 DistanceUnit = Literal["km", "miles"]
 

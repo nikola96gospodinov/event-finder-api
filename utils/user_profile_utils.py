@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 from core.logging_config import get_logger
-from models.user_profile_model import (
+from schemas.user_profile_model import (
     AcceptableTimes,
     DistanceThreshold,
     Location,

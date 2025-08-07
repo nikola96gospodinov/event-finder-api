@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException
 
 from core.llm import gemma_3_27b
-from models.user_profile_model import UserProfile
+from schemas.user_profile_model import UserProfile
 from services.search_words.get_search_words_for_event_sites import (
     get_search_keywords_for_event_sites,
 )
 
-from ..models.get_search_keywords import ErrorResponse, SearchKeywordsResponse
+from ..schemas.get_search_keywords import ErrorResponse, SearchKeywordsResponse
 
 router = APIRouter()
 

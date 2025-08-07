@@ -6,13 +6,13 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 
 from core.logging_config import get_logger
-from models.bias_options import (
+from schemas.bias_options import (
     event_format_options,
     gender_bias_options,
     relationship_status_bias_options,
     sexual_orientation_bias_options,
 )
-from models.event_model import EventDetails
+from schemas.event_model import EventDetails
 from utils.address_utils import get_location_from_postcode
 from utils.request_utils import retry_with_backoff
 

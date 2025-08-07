@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 
 from core.logging_config import get_logger
-from models.coordinates_model import Coordinates
-from models.event_model import EventDetails
-from models.user_profile_model import UserProfile
+from schemas.coordinates_model import Coordinates
+from schemas.event_model import EventDetails
+from schemas.user_profile_model import UserProfile
 from utils.address_utils import calculate_distance
 from utils.age_utils import get_age_from_birth_date
 from utils.date_utils import time_to_string

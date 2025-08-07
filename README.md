@@ -147,7 +147,7 @@ event-finder-api/
 ├── deploy-job.sh          # Job deployment script
 ├── test-job-local.sh      # Local job testing script
 ├── core/                  # Core configuration and utilities
-├── models/                # Data models
+├── schemas/                # Data schemas
 ├── services/              # Business logic services
 │   ├── event_processing/  # Event analysis services
 │   ├── scrapping/         # Web scraping services

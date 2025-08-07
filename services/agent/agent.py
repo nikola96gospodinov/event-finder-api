@@ -3,7 +3,7 @@ from playwright.async_api import async_playwright
 from core.browser_config import BrowserConfig
 from core.llm import gemma_3_27b
 from core.logging_config import get_logger
-from models.user_profile_model import UserProfile
+from schemas.user_profile_model import UserProfile
 from services.email.send_email import post_message
 from services.event_processing.check_event import check_event
 from services.runs.user_runs_service import user_run_service

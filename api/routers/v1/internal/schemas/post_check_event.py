@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from api.routers.v1.models.common import ErrorResponse
-from models.event_model import EventResult
+from api.routers.v1.schemas.common import ErrorResponse
+from schemas.event_model import EventResult
 
 
 class PostCheckEventResponse(BaseModel):

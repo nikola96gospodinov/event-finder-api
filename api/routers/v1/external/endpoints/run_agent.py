@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from models.user_profile_model import UserProfile
+from schemas.user_profile_model import UserProfile
 from services.auth.supabase_auth import get_current_user, get_current_user_profile
 from services.cloud_run_jobs import cloud_run_service
 from services.runs.user_runs_service import user_run_service
 from utils.user_profile_utils import serialize_user_profile
 
-from ..models.post_run_agent import ErrorResponse, PostRunAgentResponse
+from ..schemas.post_run_agent import ErrorResponse, PostRunAgentResponse
 
 router = APIRouter()
 

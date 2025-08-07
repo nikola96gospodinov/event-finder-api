@@ -6,9 +6,9 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 
 from core.logging_config import get_logger
-from models.coordinates_model import Coordinates
-from models.event_model import EventDetails, LocationOfEvent
-from models.user_profile_model import UserProfile
+from schemas.coordinates_model import Coordinates
+from schemas.event_model import EventDetails, LocationOfEvent
+from schemas.user_profile_model import UserProfile
 from utils.address_utils import calculate_distance
 from utils.age_utils import get_age_from_birth_date
 from utils.request_utils import retry_with_backoff

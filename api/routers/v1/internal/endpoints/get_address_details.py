@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from utils.address_utils import get_location_from_postcode
 
-from ..models.get_address_details import AddressDetailsResponse, ErrorResponse
+from ..schemas.get_address_details import AddressDetailsResponse, ErrorResponse
 
 router = APIRouter()
 

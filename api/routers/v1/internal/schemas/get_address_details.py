@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from api.routers.v1.models.common import ErrorResponse
-from models.user_profile_model import Location
+from api.routers.v1.schemas.common import ErrorResponse
+from schemas.user_profile_model import Location
 
 
 class AddressDetailsResponse(BaseModel):

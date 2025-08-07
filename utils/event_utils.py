@@ -1,7 +1,7 @@
 import datetime
 
 from core.logging_config import get_logger
-from models.event_model import EventResult
+from schemas.event_model import EventResult
 from utils.date_utils import time_to_string
 
 logger = get_logger(__name__)

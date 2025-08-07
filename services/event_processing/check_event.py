@@ -6,8 +6,8 @@ from playwright.async_api import Browser
 
 from core.logging_config import get_logger
 from core.redis_client import redis_client
-from models.event_model import EventDetails, EventResult
-from models.user_profile_model import UserProfile
+from schemas.event_model import EventDetails, EventResult
+from schemas.user_profile_model import UserProfile
 from services.event_processing.event_disqualifier import EventDisqualifier
 from services.event_processing.event_relevance_calculator import (
     EventRelevanceCalculator,
