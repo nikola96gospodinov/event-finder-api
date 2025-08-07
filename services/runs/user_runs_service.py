@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, Union
 
 from supabase import Client
 
@@ -13,8 +13,55 @@ class UserRunService:
     """Service for handling user run operations"""
 
     def __init__(self):
-        # TODO: Make this configurable
-        self.MAX_RUNS_PER_MONTH = 2
+        pass
+
+    async def get_user_subscription_type(self, user_id: str) -> str:
+        """
+        Get the user's subscription type by checking the subscriptions table
+        Returns: 'free', 'premium', or 'unlimited'
+        """
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            return "free"
+
+        try:
+            response = (
+                self.client.table("subscriptions")
+                .select("subscription_type, is_active")
+                .eq("user_id", user_id)
+                .eq("is_active", True)
+                .execute()
+            )
+
+            if response.data and len(response.data) > 0:
+                subscription_type = response.data[0].get("subscription_type", "free")
+                subscription_type_str = (
+                    str(subscription_type) if subscription_type else "free"
+                )
+                logger.info(
+                    f"User {user_id} has active subscription: {subscription_type_str}"
+                )
+                return subscription_type_str
+            else:
+                logger.info(f"User {user_id} has no active subscription")
+                return "free"
+
+        except Exception as e:
+            logger.error(f"Error checking user subscription: {e}")
+            return "free"
+
+    async def get_max_runs_per_month(self, user_id: str) -> Union[int, float]:
+        """
+        Get the maximum number of runs per month based on user's subscription
+        """
+        subscription_type = await self.get_user_subscription_type(user_id)
+
+        if subscription_type == "unlimited":
+            return float("inf")
+        elif subscription_type == "premium":
+            return 5
+        else:
+            return 2
 
     @property
     def client(self) -> Optional[Client]:
@@ -23,14 +70,19 @@ class UserRunService:
 
     async def check_user_run_limit(self, user_id: str) -> bool:
         """
-        Check if user has exceeded their monthly
-        run limit (max 2 runs per calendar month)
+        Check if user has exceeded their monthly run limit based on their subscription
         """
         if not self.client:
             logger.error("Supabase client not initialized")
             return False
 
         try:
+            max_runs = await self.get_max_runs_per_month(user_id)
+
+            if max_runs == float("inf"):
+                logger.info(f"User {user_id} has unlimited runs")
+                return True
+
             current_date = date.today()
             current_month = current_date.month
             current_year = current_date.year
@@ -57,24 +109,24 @@ class UserRunService:
                             logger.error(f"Error parsing run_date: {e}")
                             continue
 
-                if current_month_runs >= self.MAX_RUNS_PER_MONTH:
+                if current_month_runs >= max_runs:
                     logger.info(
                         (
                             f"User {user_id} has already run {current_month_runs} "
-                            f"times this month (limit: {self.MAX_RUNS_PER_MONTH})"
+                            f"times this month (limit: {max_runs})"
                         )
                     )
                     return False
                 else:
                     logger.info(
                         f"User {user_id} has {current_month_runs} runs this month, can "
-                        f"run {self.MAX_RUNS_PER_MONTH - current_month_runs} more times"
+                        f"run {max_runs - current_month_runs} more times"
                     )
                     return True
             else:
                 logger.info(
                     f"User {user_id} has no previous runs, can run up to "
-                    f"{self.MAX_RUNS_PER_MONTH} times this month"
+                    f"{max_runs} times this month"
                 )
                 return True
 

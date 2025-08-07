@@ -37,11 +37,13 @@ async def run_agent(
 
         can_run = await user_run_service.check_user_run_limit(user_id)
         if not can_run:
+            max_runs = await user_run_service.get_max_runs_per_month(user_id)
             raise HTTPException(
                 status_code=429,
                 detail=(
                     "Monthly run limit exceeded. "
-                    "You can only run the agent 2 times per calendar month."
+                    f"You can only run the agent {max_runs} "
+                    "times per calendar month."
                 ),
             )
 
