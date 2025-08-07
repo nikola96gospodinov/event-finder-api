@@ -10,7 +10,7 @@ from schemas.user_profile_model import (
     StartEndTime,
     UserProfile,
 )
-from utils.address_utils import get_location_from_postcode
+from utils.address_utils import get_location_from_query
 from utils.date_utils import time_to_string
 
 logger = get_logger(__name__)
@@ -50,8 +50,13 @@ def convert_from_supabase_user_to_user_profile(
             unit=profile_data.get("distance_threshold_unit", "miles"),
         )
 
-        location = get_location_from_postcode(profile_data.get("postcode")) or Location(
-            latitude=0, longitude=0, country="", city="", country_code=""
+        location = get_location_from_query(profile_data.get("postcode")) or Location(
+            latitude=0,
+            longitude=0,
+            country="",
+            city="",
+            country_code="",
+            area=None,
         )
 
         budget_value = profile_data.get("budget", 0)
@@ -84,6 +89,38 @@ def convert_from_supabase_user_to_user_profile(
     except Exception as e:
         logger.error(f"Error converting profile data: {e}")
         return None
+
+
+def apply_custom_overrides_to_profile(
+    user_profile: UserProfile,
+    custom_location: str | None = None,
+    custom_times: AcceptableTimes | None = None,
+) -> UserProfile:
+    """
+    Apply custom overrides to user profile.
+    Custom location and times will overwrite the user's default settings.
+    """
+    profile_dict = user_profile.model_dump()
+
+    if custom_location:
+        location = get_location_from_query(custom_location)
+        print(location)
+        if location:
+            profile_dict["location"] = location.model_dump()
+        else:
+            profile_dict["location"] = Location(
+                latitude=0,
+                longitude=0,
+                country="",
+                city=custom_location,
+                country_code="",
+                area=None,
+            ).model_dump()
+
+    if custom_times:
+        profile_dict["acceptable_times"] = custom_times.model_dump()
+
+    return UserProfile(**profile_dict)
 
 
 def serialize_user_profile(user_profile: UserProfile) -> str:

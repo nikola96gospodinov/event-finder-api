@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from utils.address_utils import get_location_from_postcode
+from utils.address_utils import get_location_from_query
 
 from ..schemas.get_address_details import AddressDetailsResponse, ErrorResponse
 
@@ -18,7 +18,7 @@ router = APIRouter()
 )
 async def get_address_details(postcode: str) -> AddressDetailsResponse:
     try:
-        location = get_location_from_postcode(postcode)
+        location = get_location_from_query(postcode)
         if location is None:
             raise HTTPException(status_code=404, detail="Postcode not found")
 

@@ -13,7 +13,7 @@ from schemas.bias_options import (
     sexual_orientation_bias_options,
 )
 from schemas.event_model import EventDetails
-from utils.address_utils import get_location_from_postcode
+from utils.address_utils import get_location_from_query
 from utils.request_utils import retry_with_backoff
 
 logger = get_logger(__name__)
@@ -138,7 +138,7 @@ def extract_event_details(
         and event_details_result.location_of_event
         and event_details_result.location_of_event.full_address
     ):
-        coordinates = get_location_from_postcode(
+        coordinates = get_location_from_query(
             event_details_result.location_of_event.full_address
         )
         if (

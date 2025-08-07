@@ -4,7 +4,10 @@ from schemas.user_profile_model import AcceptableTimes, UserProfile
 from services.auth.supabase_auth import get_current_user, get_current_user_profile
 from services.cloud_run_jobs import cloud_run_service
 from services.runs.user_runs_service import user_run_service
-from utils.user_profile_utils import serialize_user_profile
+from utils.user_profile_utils import (
+    apply_custom_overrides_to_profile,
+    serialize_user_profile,
+)
 
 from ..schemas.post_run_agent import ErrorResponse, PostRunAgentResponse
 
@@ -26,7 +29,8 @@ async def run_agent(
         False, description="Event only highly relevant to the user or not"
     ),
     custom_location: str | None = Body(
-        default=None, description="Custom location to use for the agent"
+        default=None,
+        description="Custom location to use for the agent (overwrites user's location)",
     ),
     custom_dates: list[str] | None = Body(
         default=None,
@@ -34,7 +38,9 @@ async def run_agent(
     ),
     custom_times: AcceptableTimes | None = Body(
         default=None,
-        description="Custom set of acceptable times",
+        description=(
+            "Custom set of acceptable times (overwrites user's acceptable times)"
+        ),
     ),
     user: dict = Depends(get_current_user),
     user_profile: UserProfile = Depends(get_current_user_profile),
@@ -65,16 +71,23 @@ async def run_agent(
             )
 
         try:
+            modified_profile = apply_custom_overrides_to_profile(
+                user_profile=user_profile,
+                custom_location=custom_location,
+                custom_times=custom_times,
+            )
+
             parameters = {
                 "only_highly_relevant": str(only_highly_relevant),
-                "user_profile": serialize_user_profile(user_profile),
+                "user_profile": serialize_user_profile(modified_profile),
                 "user_id": user_id,
             }
 
             task_id = await cloud_run_service.execute_job(parameters=parameters)
 
             return PostRunAgentResponse(
-                task_id=task_id, status="Task submitted to Cloud Run Jobs successfully"
+                task_id=task_id,
+                status="Task submitted to Cloud Run Jobs successfully",
             )
         except Exception as e:
             raise HTTPException(

@@ -29,12 +29,12 @@ class StartEndTime(BaseModel):
     start: Optional[str] = Field(
         None,
         description="Start time in HH:MM format",
-        pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$",
+        pattern=r"^([0-9]|1[0-9]|2[0-3]):[0-5][0-9]$",
     )
     end: Optional[str] = Field(
         None,
         description="End time in HH:MM format",
-        pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$",
+        pattern=r"^([0-9]|1[0-9]|2[0-3]):[0-5][0-9]$",
     )
 
 

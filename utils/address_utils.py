@@ -1,5 +1,4 @@
 import math
-import re
 from urllib.parse import quote
 
 import httpx
@@ -11,19 +10,17 @@ from schemas.user_profile_model import DistanceUnit, Location
 logger = get_logger(__name__)
 
 
-def extract_postcode_from_address(address: str) -> str | None:
-    postcode_pattern = r"\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b"
-    match = re.search(postcode_pattern, address)
-    return match.group(0) if match else None
-
-
-def get_location_from_postcode(postcode: str | None) -> Location | None:
-    if postcode is None:
+def get_location_from_query(query: str | None) -> Location | None:
+    """
+    Get location from query using Nominatim API. A query can be a postcode, city,
+    suburb, district, or a combination of these.
+    """
+    if query is None:
         return None
 
     url = (
         f"https://nominatim.openstreetmap.org/search"
-        f"?q={quote(postcode)}&format=json"
+        f"?q={quote(query)}&format=json"
         f"&polygon_kml=1&addressdetails=1"
     )
     headers = {
@@ -41,8 +38,8 @@ def get_location_from_postcode(postcode: str | None) -> Location | None:
                     country=result_json[0]["address"]["country"],
                     city=result_json[0]["address"]["city"],
                     country_code=result_json[0]["address"]["country_code"],
-                    area=result_json[0]["address"]["suburb"]
-                    or result_json[0]["address"]["district"],
+                    area=result_json[0]["address"].get("suburb", None)
+                    or result_json[0]["address"].get("district", None),
                 )
         else:
             logger.info("Empty response received")
