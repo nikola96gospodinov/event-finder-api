@@ -57,6 +57,7 @@ async def run_agent(
             parameters = {
                 "only_highly_relevant": str(only_highly_relevant),
                 "user_profile": serialize_user_profile(user_profile),
+                "user_id": user_id,
             }
 
             task_id = await cloud_run_service.execute_job(parameters=parameters)

@@ -106,5 +106,32 @@ class UserRunService:
             logger.error(f"Error recording user run: {e}")
             return False
 
+    async def revert_user_run(self, user_id: str) -> bool:
+        """Revert a user run"""
+        if not self.client:
+            logger.error("Supabase client not initialized")
+            return False
+
+        try:
+            latest_run = (
+                self.client.table("runs")
+                .select("id")
+                .eq("user_id", user_id)
+                .order("run_date", desc=True)
+                .limit(1)
+                .execute()
+            )
+            if latest_run.data and len(latest_run.data) > 0:
+                run_id = latest_run.data[0]["id"]
+                self.client.table("runs").delete().eq("id", run_id).execute()
+                return True
+            else:
+                logger.error(f"No runs found for user {user_id}")
+                return False
+
+        except Exception as e:
+            logger.error(f"Error reverting user run: {e}")
+            return False
+
 
 user_run_service = UserRunService()

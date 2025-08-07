@@ -45,6 +45,7 @@ print("=" * 30)
 
 only_highly_relevant = args.only_highly_relevant or "Not provided"
 user_profile_json = args.user_profile or "Not provided"
+user_id = args.user_id or "Not provided"
 
 print(f"only_highly_relevant: {only_highly_relevant}")
 print(f"user_profile: {user_profile_json}")
@@ -72,6 +73,7 @@ if only_highly_relevant.lower() in ["true", "1", "yes", "on"]:
     only_highly_relevant_bool = True
 
 print(f"only_highly_relevant (boolean): {only_highly_relevant_bool}")
+print(f"user_id: {user_id}")
 
 print("\n" + "=" * 30)
 print("EXECUTING AGENT")
@@ -79,7 +81,7 @@ print("=" * 30)
 
 try:
     # Run the agent function directly
-    asyncio.run(agent(user_profile, only_highly_relevant_bool))
+    asyncio.run(agent(user_profile, user_id, only_highly_relevant_bool))
     print("Agent execution completed successfully")
 except Exception as e:
     print(f"ERROR: Agent execution failed: {e}")

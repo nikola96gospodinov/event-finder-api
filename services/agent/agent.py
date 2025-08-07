@@ -6,6 +6,7 @@ from core.logging_config import get_logger
 from models.user_profile_model import UserProfile
 from services.email.send_email import post_message
 from services.event_processing.check_event import check_event
+from services.runs.user_runs_service import user_run_service
 from services.scrapping.scrappers import get_event_links
 from services.search_words.get_search_words_for_event_sites import (
     get_search_keywords_for_event_sites,
@@ -19,7 +20,9 @@ from utils.event_utils import (
 logger = get_logger(__name__)
 
 
-async def agent(user_profile: UserProfile, only_highly_relevant: bool = False):
+async def agent(
+    user_profile: UserProfile, user_id: str, only_highly_relevant: bool = False
+):
     logger.info("Starting agent execution")
     try:
         search_keywords = get_search_keywords_for_event_sites(user_profile, gemma_3_27b)
@@ -73,6 +76,7 @@ async def agent(user_profile: UserProfile, only_highly_relevant: bool = False):
         )
     except Exception as e:
         logger.error(f"Error in agent execution: {str(e)}")
+        await user_run_service.revert_user_run(user_id)
         raise
     finally:
         try:
