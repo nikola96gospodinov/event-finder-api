@@ -41,6 +41,8 @@ def get_location_from_postcode(postcode: str | None) -> Location | None:
                     country=result_json[0]["address"]["country"],
                     city=result_json[0]["address"]["city"],
                     country_code=result_json[0]["address"]["country_code"],
+                    area=result_json[0]["address"]["suburb"]
+                    or result_json[0]["address"]["district"],
                 )
         else:
             logger.info("Empty response received")

@@ -22,6 +22,7 @@ class Location(Coordinates):
     country: Optional[str] = Field(None, description="Country")
     city: Optional[str] = Field(None, description="City")
     country_code: Optional[str] = Field(None, description="Country code")
+    area: Optional[str] = Field(None, description="Area")
 
 
 class StartEndTime(BaseModel):
