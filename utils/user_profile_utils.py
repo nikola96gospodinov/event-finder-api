@@ -84,6 +84,7 @@ def convert_from_supabase_user_to_user_profile(
             goals=profile_data.get("goals", []),
             occupation=profile_data.get("occupation", ""),
             email=email or "",
+            custom_dates=None,
         )
 
     except Exception as e:
@@ -95,10 +96,11 @@ def apply_custom_overrides_to_profile(
     user_profile: UserProfile,
     custom_location: str | None = None,
     custom_times: AcceptableTimes | None = None,
+    custom_dates: list[str] | None = None,
 ) -> UserProfile:
     """
     Apply custom overrides to user profile.
-    Custom location and times will overwrite the user's default settings.
+    Custom location, times, and dates will overwrite the user's default settings.
     """
     profile_dict = user_profile.model_dump()
 
@@ -119,6 +121,9 @@ def apply_custom_overrides_to_profile(
 
     if custom_times:
         profile_dict["acceptable_times"] = custom_times.model_dump()
+
+    if custom_dates:
+        profile_dict["custom_dates"] = custom_dates
 
     return UserProfile(**profile_dict)
 

@@ -75,6 +75,7 @@ async def run_agent(
                 user_profile=user_profile,
                 custom_location=custom_location,
                 custom_times=custom_times,
+                custom_dates=custom_dates,
             )
 
             parameters = {

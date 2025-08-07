@@ -75,6 +75,9 @@ class UserProfile(BaseModel):
     time_commitment_in_minutes: int = Field(
         ..., ge=0, le=1440, description="User's time commitment in minutes"
     )
+    custom_dates: Optional[list[str]] = Field(
+        None, description="Custom set of acceptable dates in DD-MM-YYYY format"
+    )
 
     class Config:
         json_schema_extra = {

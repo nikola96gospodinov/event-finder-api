@@ -37,6 +37,7 @@ class EventDisqualifier:
             self._is_event_suitable_for_relationship_status,
             self._is_event_suitable_for_event_format,
             self._is_event_within_acceptable_times,
+            self._is_event_within_custom_dates,
             self._is_not_past_event,
             self._is_event_page_non_empty,
         ]
@@ -288,6 +289,24 @@ class EventDisqualifier:
                         return False
 
         return True
+
+    def _is_event_within_custom_dates(self, event_details: EventDetails) -> bool:
+        """Check if event date is within the custom date range."""
+        if not self.user_profile.custom_dates:
+            return True
+
+        event_date_str = event_details.date_of_event
+        if not event_date_str:
+            return True
+
+        if event_date_str in self.user_profile.custom_dates:
+            return True
+
+        logger.info(
+            f"Event date {event_date_str} is not in custom dates: "
+            f"{self.user_profile.custom_dates}"
+        )
+        return False
 
     def _is_not_past_event(self, event_details: EventDetails) -> bool:
         event_date_str = event_details.date_of_event

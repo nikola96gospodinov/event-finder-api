@@ -33,11 +33,11 @@ def get_location_from_query(query: str | None) -> Location | None:
             result_json = result.json()
             if result_json and len(result_json) > 0:
                 return Location(
-                    latitude=float(result_json[0]["lat"]),
-                    longitude=float(result_json[0]["lon"]),
-                    country=result_json[0]["address"]["country"],
-                    city=result_json[0]["address"]["city"],
-                    country_code=result_json[0]["address"]["country_code"],
+                    latitude=float(result_json[0].get("lat", 0)),
+                    longitude=float(result_json[0].get("lon", 0)),
+                    country=result_json[0]["address"].get("country", None),
+                    city=result_json[0]["address"].get("city", None),
+                    country_code=result_json[0]["address"].get("country_code", None),
                     area=result_json[0]["address"].get("suburb", None)
                     or result_json[0]["address"].get("district", None),
                 )
