@@ -40,6 +40,7 @@ class ScoringSystem(TypedDict):
     interests: Interests
     goals: Goals
     industry_mismatch: industry_mismatch_options
+    overly_specific_nationality_or_ethic_group: bool
 
 
 class EventRelevanceCalculator:
@@ -85,13 +86,11 @@ class EventRelevanceCalculator:
             - **Weak Match**: The event is only tangentially related to the user's goal
             > Only use the the provided tires to categorize matches.
 
-            DEDUCTION SYSTEM
-
-            STEP 1: INDUSTRY MISMATCH DEDUCTION
-            IMPORTANT: Only apply this deduction if the event's primary purpose is professional networking and the event is not for the user's industry or tightly related industries.
+            STEP 3: INDUSTRY MISMATCH
+            IMPORTANT: Only consider anything other than a "no mismatch" if the event's primary purpose is professional networking and the event is not for the user's industry or tightly related industries.
             User's occupation is {occupation}
-                Important exception to that rule is that if the event aligns with a goal of the user (e.g. "find a business partner", "find a co-founder", "find a new career", "find investors"), this deduction is not applied and the score is 0.
-                For example, if one of the user's goals is to "find a business partner" or "find an investor", and the event is for "entrepreneurs, business owners, and investors", this deduction is not applied even if the user is not a business owner or a investor and the score is 0 and everything else for this point is ignored.
+                Important exception to that rule is that if the event aligns with a goal of the user (e.g. "find a business partner", "find a co-founder", "find a new career", "find investors"), then it's not a mismatch.
+                For example, if one of the user's goals is to "find a business partner" or "find an investor", and the event is for "entrepreneurs, business owners, and investors", then it's not a mismatch even if the user is not a business owner or a investor.
 
             Evaluate the industry mismatch against the user's occupation:
             - **Complete industry mismatch**: Event is explicitly and exclusively for professionals in a completely different field with no overlap with user's occupation
@@ -100,9 +99,21 @@ class EventRelevanceCalculator:
                 Example: Software Engineer attending "UI Design Professionals" or "Copywriting Professionals" event
             - **Overly broad or undefined audience**: Event is for a very generic professional audience with no industry focus, or doesn't specify the target professional audience at all
                 Example: "Networking Mixer" or "Working Professional Networking" or "Creative Professionals" with no industry specification or too broad of an audience.
-            - **No deduction**: Apply in any of these cases:
+            - **No mismatch**: Apply in any of these cases:
                 * Event is for the user's industry or tightly related industries
                 * Event has clear overlap with the user's field, interests, and/or goals
+
+            STEP 4: OVERLY SPECIFIC NATIONALITY OR ETHIC GROUP
+            IMPORTANT EXCEPTION: if anything in the user's interests or goals is related to the nationality or ethnicity of the event, then this is "False".
+            This is binary. It's either:
+            - "True" if the event is for a specific nationality or ethnicity and the user doesn't have an interest or goal related to that nationality or ethnicity
+                Example: "Indian Social Mixer" but the user doesn't have an interest or goal related to India and nothing in the user's profile indicates that they are from India.
+            - "False":
+                - if the event is NOT for a specific nationality or ethnicity
+                - if the event is for a specific nationality or ethnicity but the user has a goal or interest that is related to that nationality or ethnicity
+                    Example: "Latin community event" but the user has a goal to "learn Spanish" or is interested in "Latin dancing" or "Latin culture".
+                - If the event mentioned a specific nationality or ethnicity, but this is not because the event targets only people of that nationality or ethnicity. E.g "Italian cooking", "German beer", "French wine", "Latin dancing", "Chinese language exchange"
+                    Example: "Italian cooking class" does not necessarily mean that the user needs to have an interest or goal related to Italy or Italian culture.
 
             IMPORTANT NOTES FOR DEDUCTION SCORE:
             - Only use the the provided tires to categorize mismatches.
@@ -126,6 +137,7 @@ class EventRelevanceCalculator:
                 - partial_match: number of goals that are a partial match
                 - weak_match: number of goals that are a weak match
             - industry_mismatch: one of the following options: {industry_mismatch_options}
+            - overly_specific_nationality_or_ethic_group: boolean
             Example:
             {{
                 "interests": {{
@@ -138,7 +150,8 @@ class EventRelevanceCalculator:
                     "partial_match": 0,
                     "weak_match": 3
                 }},
-                "industry_mismatch": "complete_mismatch"
+                "industry_mismatch": "complete_mismatch",
+                "overly_specific_nationality_or_ethic_group": False
             }}
             Don't do any formatting. Just return the Python dictionary as plain text. Under any circumstances, don't use ```python or ``` in the response.
             Under any circumstances, don't return JSON and make sure the response is a valid Python dictionary. This is crucial.
@@ -197,8 +210,18 @@ class EventRelevanceCalculator:
                 industry_mismatch_score = self._industry_mismatch_deduction(
                     scoring_system["industry_mismatch"]
                 )
+                overly_specific_group_score = (
+                    35
+                    if scoring_system["overly_specific_nationality_or_ethic_group"]
+                    else 0
+                )
 
-                return interests_score + goals_score - industry_mismatch_score
+                return (
+                    interests_score
+                    + goals_score
+                    - industry_mismatch_score
+                    - overly_specific_group_score
+                )
             except (SyntaxError, ValueError) as e:
                 logger.error(f"Error parsing scoring system: {e}")
                 return 0
