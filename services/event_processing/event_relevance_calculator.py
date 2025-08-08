@@ -35,12 +35,19 @@ industry_mismatch_options = Literal[
     "no_mismatch",
 ]
 
+extra_info_options = Literal[
+    "positive",
+    "negative",
+    "neutral",
+]
+
 
 class ScoringSystem(TypedDict):
     interests: Interests
     goals: Goals
     industry_mismatch: industry_mismatch_options
     overly_specific_nationality_or_ethic_group: bool
+    extra_info: Optional[extra_info_options]
 
 
 class EventRelevanceCalculator:
@@ -62,13 +69,27 @@ class EventRelevanceCalculator:
     def _calculate_event_relevance_based_on_interests_and_goals(
         self, webpage_content: str
     ) -> float | int:
+        extra_info_section = (
+            """
+            STEP 5: EXTRA INFO
+            Return one of the following options if anything in the user's extra information is relevant or irrelevant to the event.
+            - "positive" if the event is more relevant to the user based on the extra information provided e.g someone mentioning their religion and the event being specifically for that religion
+            - "negative" if the event is less relevant to the user based on the extra information provided e.g. someone mentioning they are an introvert and the event is geared more towards extroverts
+            - "neutral" if the provided extra information doesn't make a difference to the event's relevance to the user
+            """
+            if self.user_profile.extra_info
+            else ""
+        )
+
         template = """
             You are a helpful personal assistant who evaluates events for relevance to a given user.
 
-            Your task is to scan the event information and determine how relevant it is to the user using a precise scoring system and rich reasoning.
+            Your task is to scan the event information and determine how relevant it is to the user using a precise structured scoring system and rich reasoning.
 
             THE WEB PAGE CONTENT:
             {webpage_content}
+
+            Extra information about the user is: {extra_info}
 
             STEP 1: INTEREST MATCH
             Count how many interests the event matches with the user's interests using the provided tiers.
@@ -104,30 +125,21 @@ class EventRelevanceCalculator:
                 * Event has clear overlap with the user's field, interests, and/or goals
 
             STEP 4: OVERLY SPECIFIC NATIONALITY OR ETHIC GROUP
-            IMPORTANT EXCEPTION: if anything in the user's interests or goals is related to the nationality or ethnicity of the event, then this is "False".
+            IMPORTANT EXCEPTION: if anything in the user's interests, goals, or extra information is related to the nationality or ethnicity of the event, then this is "False".
             This is binary. It's either:
-            - "True" if the event is for a specific nationality or ethnicity and the user doesn't have an interest or goal related to that nationality or ethnicity
+            - "True" if the event is for a specific nationality or ethnicity and the user doesn't have an interest, goal, or extra information related to that nationality or ethnicity
                 Example: "Indian Social Mixer" but the user doesn't have an interest or goal related to India and nothing in the user's profile indicates that they are from India.
             - "False":
                 - if the event is NOT for a specific nationality or ethnicity
-                - if the event is for a specific nationality or ethnicity but the user has a goal or interest that is related to that nationality or ethnicity
+                - if the event is for a specific nationality or ethnicity but the user has a goal, interest, or extra information that is related to that nationality or ethnicity
                     Example: "Latin community event" but the user has a goal to "learn Spanish" or is interested in "Latin dancing" or "Latin culture".
                 - If the event mentioned a specific nationality or ethnicity, but this is not because the event targets only people of that nationality or ethnicity. E.g "Italian cooking", "German beer", "French wine", "Latin dancing", "Chinese language exchange"
                     Example: "Italian cooking class" does not necessarily mean that the user needs to have an interest or goal related to Italy or Italian culture.
 
-            IMPORTANT NOTES FOR DEDUCTION SCORE:
-            - Only use the the provided tires to categorize mismatches.
-
-            IMPORTANT RULES FOR RELEVANCE SCORE:
-            - Never exceed the maximum score for each category.
-            - Keep two scores separate: one for the relevance score and one for the deduction score.
-            - Always justify each score with specific evidence from the event description.
-            - At least one interest match is required for any score above 0.
-            - Use varied phrasing and tone in your reasoning (analytical, conversational, comparative).
-            - Use some variation in how you phrase judgments to avoid repetitive tone.
+            {extra_info_section}
 
             RESPONSE FORMAT:
-            1. Start with a Python dictionary with the following format:
+            1. Always start with a Python dictionary with the following format:
             - interests:
                 - exact_match: number of interests that are an exact match
                 - partial_match: number of interests that are a partial match
@@ -138,6 +150,7 @@ class EventRelevanceCalculator:
                 - weak_match: number of goals that are a weak match
             - industry_mismatch: one of the following options: {industry_mismatch_options}
             - overly_specific_nationality_or_ethic_group: boolean
+            - extra_info (optional): one of the following options: {extra_info_options}
             Example:
             {{
                 "interests": {{
@@ -151,7 +164,8 @@ class EventRelevanceCalculator:
                     "weak_match": 3
                 }},
                 "industry_mismatch": "complete_mismatch",
-                "overly_specific_nationality_or_ethic_group": False
+                "overly_specific_nationality_or_ethic_group": False,
+                "extra_info": "neutral"
             }}
             Don't do any formatting. Just return the Python dictionary as plain text. Under any circumstances, don't use ```python or ``` in the response.
             Under any circumstances, don't return JSON and make sure the response is a valid Python dictionary. This is crucial.
@@ -173,6 +187,9 @@ class EventRelevanceCalculator:
                     "goals": self.user_profile.goals,
                     "webpage_content": webpage_content,
                     "industry_mismatch_options": industry_mismatch_options,
+                    "extra_info": self.user_profile.extra_info,
+                    "extra_info_section": extra_info_section,
+                    "extra_info_options": extra_info_options,
                 },
             )
 
@@ -215,12 +232,20 @@ class EventRelevanceCalculator:
                     if scoring_system["overly_specific_nationality_or_ethic_group"]
                     else 0
                 )
+                extra_info_value = scoring_system.get("extra_info")
+                if extra_info_value == "positive":
+                    extra_info_score = 25
+                elif extra_info_value == "negative":
+                    extra_info_score = -25
+                else:
+                    extra_info_score = 0
 
                 return (
                     interests_score
                     + goals_score
                     - industry_mismatch_score
                     - overly_specific_group_score
+                    + extra_info_score
                 )
             except (SyntaxError, ValueError) as e:
                 logger.error(f"Error parsing scoring system: {e}")

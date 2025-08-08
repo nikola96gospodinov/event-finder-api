@@ -76,7 +76,8 @@ def get_search_keywords_for_event_sites(
     extra_info_section = (
         """
         7. EXTRA INFO:
-        - If the user has provided extra information, use it to create more specific queries. This can be anything from the user's nationality, religion, emotions, to extra context, etc.
+        The user's extra information is: {extra_info}
+        - Use the user's extra information to create 1-2 queries. If there is nothing in the user's extra information that offers an opportunity for a new query, then don't include it in the output.
     """
         if user_profile.extra_info
         else ""
@@ -87,34 +88,33 @@ def get_search_keywords_for_event_sites(
 
         IMPORTANT: Format your response ONLY as a comma-separated list of search queries with NO additional text or explanations. Limit the number of queries to 20.
         IMPORTANT: Examples (e.g.) are just for demonstration purposes. DO NOT follow them exactly. If the user has no interest in something that was provided in the examples, then do not include it in the output. The only exception is negative examples. If a negative example is provided, then under no circumstances should you include it in the output.
-        
-        Consider:
-        - User's goals: {goals}
-        - User's age bracket: {age_bracket}
-        - User's interests: {interests}
-        - User's occupation: {occupation}
-        - User's gender: {gender}
+
+        The user's occupation is: {occupation}
+        The user's extra information is: {extra_info}
 
         QUERY CREATION RULES:
         1. GOAL-BASED QUERIES:
+        The user's goals are: {goals}
         - Create personalized queries for EACH goal
         - ONLY IF appropriate generate an EXTRA query (don't replace the original query) for a goal that will find other relevant events (e.g. "find a business partner" -> "pitch night", "make new friends" -> "community {age_bracket}").
-        
+
         2. AGE-SPECIFIC QUERIES:
         - For social/community goals, ALWAYS include age bracket (e.g., "community {age_bracket}", "make friends {age_bracket}") but not for professional goals (e.g., "networking {age_bracket}" or "business partner {age_bracket}" are NOT good queries) nor for more general goals (e.g., "volunteering {age_bracket}", "yoga classes {age_bracket}", "running clubs {age_bracket}" are NOT good queries)
 
         3. GENDER-SPECIFIC QUERIES:
+        The user's gender is: {gender}
         - Create one gender-specific query based on the user's gender (e.g. ladies only, men circles etc.)
 
         {lgbtq_section}
 
         {single_non_lgbtq_section}
-            
+
         {single_lgbtq_section}
 
         {extra_info_section}
 
         8. INTEREST-BASED QUERIES:
+        The user's interests are: {interests}
         - Keep all interest queries to 4 words or less
         - DO NOT include age bracket in interest queries, only include it in goal-based queries
 
@@ -129,7 +129,7 @@ def get_search_keywords_for_event_sites(
         EXAMPLE OUTPUT FORMAT (ONLY AS A GUIDE):
         "make friends {age_bracket}, find a business partner, tech startups, python coding, hiking outdoors, AI"
         - The above are just examples. DO NOT follow them exactly. Only use them as a guide.
-        
+
         IMPORTANT:
         Examples are just that, examples. DO NOT follow them exactly. If the user has no interest in something that was provided in the examples, then do not include it in the output. The only exception is negative examples. If a negative example is provided, then under no circumstances should you include it in the output.
     """
@@ -153,6 +153,7 @@ def get_search_keywords_for_event_sites(
             "single_non_lgbtq_section": single_non_lgbtq_section,
             "single_lgbtq_section": single_lgbtq_section,
             "extra_info_section": extra_info_section,
+            "extra_info": user_profile.extra_info,
         },
     )
 
