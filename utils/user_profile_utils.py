@@ -85,6 +85,7 @@ def convert_from_supabase_user_to_user_profile(
             occupation=profile_data.get("occupation", ""),
             email=email or "",
             custom_dates=None,
+            extra_info=profile_data.get("extra_info"),
         )
 
     except Exception as e:
