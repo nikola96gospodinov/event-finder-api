@@ -97,8 +97,8 @@ class UserProfile(BaseModel):
                     "weekdays": {"start": "18:00", "end": "22:00"},
                     "weekends": {"start": "10:00", "end": "23:00"},
                 },
-                "location": {"latitude": 40.7128, "longitude": -74.0060},
-                "distance_threshold": {"distance_threshold": 25, "unit": "km"},
-                "time_commitment_in_minutes": 120,
+                "location": {"latitude": 51.5072, "longitude": 0.1276},
+                "distance_threshold": {"distance_threshold": 25, "unit": "miles"},
+                "time_commitment_in_minutes": 240,
             }
         }
