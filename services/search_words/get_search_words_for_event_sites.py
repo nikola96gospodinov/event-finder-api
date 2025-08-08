@@ -66,10 +66,19 @@ def get_search_keywords_for_event_sites(
     single_lgbtq_section = (
         """
         6. SINGLE-SPECIFIC QUERY:
-        - Create one single-specific query (e.g. "LGBTQ+ speed dating", "LGBTQ+ singles", etc.)
+        - Create one single-specific query (e.g. "{sexual_orientation} speed dating", "LGBTQ+ singles", etc.)
     """
         if user_profile.relationship_status == "single"
         and user_profile.sexual_orientation != "straight"
+        else ""
+    )
+
+    extra_info_section = (
+        """
+        7. EXTRA INFO:
+        - If the user has provided extra information, use it to create more specific queries. This can be anything from the user's nationality, religion, emotions, to extra context, etc.
+    """
+        if user_profile.extra_info
         else ""
     )
 
@@ -95,7 +104,7 @@ def get_search_keywords_for_event_sites(
         - For social/community goals, ALWAYS include age bracket (e.g., "community {age_bracket}", "make friends {age_bracket}") but not for professional goals (e.g., "networking {age_bracket}" or "business partner {age_bracket}" are NOT good queries) nor for more general goals (e.g., "volunteering {age_bracket}", "yoga classes {age_bracket}", "running clubs {age_bracket}" are NOT good queries)
 
         3. GENDER-SPECIFIC QUERIES:
-        - Create one gender-specific query based on the user's gender (e.g. ladies only, men circles, etc.)
+        - Create one gender-specific query based on the user's gender (e.g. ladies only, men circles etc.)
 
         {lgbtq_section}
 
@@ -103,15 +112,17 @@ def get_search_keywords_for_event_sites(
             
         {single_lgbtq_section}
 
-        7. INTEREST-BASED QUERIES:
+        {extra_info_section}
+
+        8. INTEREST-BASED QUERIES:
         - Keep all interest queries to 4 words or less
         - DO NOT include age bracket in interest queries, only include it in goal-based queries
 
-        8. PROHIBITED TERMS:
+        9. PROHIBITED TERMS:
         - NO generic terms (e.g. "events", "meetups", "community", "group", "gathering", "enthusiasts", "near me", "weekend") unless they are absolutely necessary
         - NO generic queries (e.g. "professional connections", "find collaborators", "business collaboration", "networking", "professional networking", "find a job", "job fairs", "job training")
 
-        9. QUERY DIVERSITY:
+        10. QUERY DIVERSITY:
         - Avoid overly similar queries that would return the same results. For example, repeating the same query with different variations of the same word
         - Focus on specificity and relevance
 
@@ -137,9 +148,11 @@ def get_search_keywords_for_event_sites(
             ),
             "occupation": user_profile.occupation,
             "gender": user_profile.gender,
+            "sexual_orientation": user_profile.sexual_orientation,
             "lgbtq_section": lgbtq_section,
             "single_non_lgbtq_section": single_non_lgbtq_section,
             "single_lgbtq_section": single_lgbtq_section,
+            "extra_info_section": extra_info_section,
         },
     )
 

@@ -29,12 +29,10 @@ class StartEndTime(BaseModel):
     start: Optional[str] = Field(
         None,
         description="Start time in HH:MM format",
-        pattern=r"^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$",
     )
     end: Optional[str] = Field(
         None,
         description="End time in HH:MM format",
-        pattern=r"^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$",
     )
 
 
@@ -77,6 +75,9 @@ class UserProfile(BaseModel):
     )
     custom_dates: Optional[list[str]] = Field(
         None, description="Custom set of acceptable dates in DD-MM-YYYY format"
+    )
+    extra_info: Optional[str] = Field(
+        None, description="Extra information about the user"
     )
 
     class Config:
