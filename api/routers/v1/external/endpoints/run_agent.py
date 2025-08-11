@@ -45,7 +45,6 @@ async def run_agent(
     user: dict = Depends(get_current_user),
     user_profile: UserProfile = Depends(get_current_user_profile),
 ):
-    print(user_profile)
     """Run agent endpoint"""
     try:
         user_id = user.get("id")
