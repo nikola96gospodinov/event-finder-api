@@ -107,7 +107,6 @@ def apply_custom_overrides_to_profile(
 
     if custom_location:
         location = get_location_from_query(custom_location)
-        print(location)
         if location:
             profile_dict["location"] = location.model_dump()
         else:
