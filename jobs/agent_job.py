@@ -36,6 +36,7 @@ parser.add_argument(
     "--only_highly_relevant", type=str, help="Only highly relevant events"
 )
 parser.add_argument("--user_profile", type=str, help="User profile JSON")
+parser.add_argument("--user_id", type=str, help="User ID")
 
 args = parser.parse_args()
 
@@ -49,6 +50,7 @@ user_id = args.user_id or "Not provided"
 
 print(f"only_highly_relevant: {only_highly_relevant}")
 print(f"user_profile: {user_profile_json}")
+print(f"user_id: {user_id}")
 
 if user_profile_json == "Not provided":
     print("ERROR: user_profile parameter is required")
@@ -73,7 +75,6 @@ if only_highly_relevant.lower() in ["true", "1", "yes", "on"]:
     only_highly_relevant_bool = True
 
 print(f"only_highly_relevant (boolean): {only_highly_relevant_bool}")
-print(f"user_id: {user_id}")
 
 print("\n" + "=" * 30)
 print("EXECUTING AGENT")
